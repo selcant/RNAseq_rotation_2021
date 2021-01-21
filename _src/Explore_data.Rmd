@@ -1,0 +1,53 @@
+---
+title: "Data exploration"
+author: "Selcan Aydin"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 4
+    toc_float: 
+      collapsed: false
+      smooth_scroll: false
+    df_print: paged
+    code_folding: hide
+  github_document: 
+    toc: true
+    toc_depth: 4
+---
+
+
+First, let's call the `here` package to set our working directory. Make sure you opened the Rstudio project. 
+
+```{r}
+library(here) # you can install it if you don't have it: install.packages("here")
+```
+
+This should tell us that we are at /path-to-git-repo/RNAseq_rotation_2021 . 
+
+Let's now load in the data, it should be at /path-to-git-repo/RNAseq_rotation_2021/_data 
+
+```{r}
+loaded_data <- load(here("_data","DO_mESC_counts_pe_r1.RData"))
+loaded_data
+```
+
+Now we have loaded three data tables. Let's take a look at them. First, the covariates:
+
+```{r}
+esc_covar 
+```
+
+Gene expression counts from only first set of reads (esc_raw_expr_r1):
+
+```{r}
+esc_raw_expr_r1[1:5,1:5]
+```
+
+
+Gene expression counts from paired end reads (esc_raw_expr_pe):
+
+```{r}
+esc_raw_expr_pe[1:5,1:5]
+```
+
