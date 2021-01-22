@@ -11,9 +11,6 @@ output:
       smooth_scroll: false
     df_print: paged
     code_folding: hide
-  github_document: 
-    toc: true
-    toc_depth: 4
 ---
 
 
