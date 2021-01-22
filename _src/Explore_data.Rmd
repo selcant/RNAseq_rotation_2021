@@ -20,6 +20,16 @@ First, let's call the `here` package to set our working directory. Make sure you
 library(here) # you can install it if you don't have it: install.packages("here")
 ```
 
+We just installed "here" package so I am going to use 'renv::snapshot" to record it:
+
+```{r}
+renv::snapshot()
+```
+
+
+
+
+
 This should tell us that we are at /path-to-git-repo/RNAseq_rotation_2021 . 
 
 Let's now load in the data, it should be at /path-to-git-repo/RNAseq_rotation_2021/_data 
