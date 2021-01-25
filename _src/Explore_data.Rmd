@@ -45,7 +45,13 @@ Now we have loaded three data tables. Let's take a look at them. First, the cova
 esc_covar 
 ```
 
+the row names are the gene names
+the column names are sample ids
+
+
 Gene expression counts from only first set of reads (esc_raw_expr_r1):
+
+
 
 ```{r}
 esc_raw_expr_r1[1:5,1:5]
