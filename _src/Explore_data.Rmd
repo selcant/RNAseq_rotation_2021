@@ -34,7 +34,7 @@ create_dt <- function(x){
                 rownames = FALSE, filter="top",
                 options = list(dom = 'Blfrtip',
                                buttons = c('copy', 'csv', 'excel'),
-                               pageLength = 5, scrollX=T))
+                               pageLength = 10, scrollX=T))
 }
 
 
@@ -67,8 +67,8 @@ Gene expression counts from only first set of reads (esc_raw_expr_r1) and the ro
 ```{r}
 esc_raw_expr_r1 %>% 
   as_tibble( rownames = "ensembl_gene_id") %>% # convert to tibble with the rownames as a new column labeled ensembl_gene_id
-  select(1:5) %>%  # select first 5 columns
-  slice( 1:5) %>%  # slice first 5 rows
+  select(1:6) %>%  # select first 5 columns
+  slice( 1:10) %>%  # slice first 5 rows
   create_dt() # formatting
 ```
 
@@ -107,7 +107,7 @@ esc_covar %>%
 
 esc_raw_expr_r1_tibble %>% 
   ggplot() + # calling the plotting function
-  aes( x = `PB357.02_repA`, 
+  aes( x = `ENSMUSG00000000001	`, 
        y = `PB357.07_repA`) + # now we can set the aesthetics, what goes on which axes, what color... you can use variable/column names inside here.
   geom_point( size = 2 ) + # now we call the type of plot we want to see. in this case we want points. and set related parameters.
   theme_pubclean() # theme: visual properties of the plot.
@@ -154,8 +154,8 @@ esc_raw_expr_r1 %>%
   as_tibble( rownames = "sample_id") -> esc_raw_expr_r1_tibble_t
 
 esc_raw_expr_r1_tibble_t %>% 
-  slice(1:5) %>% 
-  select(1:5) %>% 
+  slice(1:6) %>% 
+  select(1:10) %>% 
  create_dt()
 
 ```
@@ -166,7 +166,7 @@ esc_raw_expr_r1_tibble_t %>%
 esc_raw_expr_r1_tibble_t %>% 
   ggplot() + # calling the plotting function
   aes( x = `ENSMUSG00000000056`, 
-       y = `ENSMUSG00000000028`) + # now we can set the aesthetics, what goes on which axes, what color... you can use variable/column names inside here.
+       y = `ENSMUSG00000000028`, color = sample_id) + # now we can set the aesthetics, what goes on which axes, what color... you can use variable/column names inside here.
   geom_point( size = 2 ) + # now we call the type of plot we want to see. in this case we want points. and set related parameters.
   theme_pubclean() # theme: visual properties of the plot.
 
