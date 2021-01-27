@@ -11,12 +11,13 @@ output:
       smooth_scroll: false
     df_print: paged
     code_folding: hide
+    theme: flatly
 ---
 
 
 First, let's call the `here` package to set our working directory. Make sure you opened the Rstudio project. This should tell us that we are at /path-to-git-repo/RNAseq_rotation_2021 . I am also loading the `tidyverse` and `ggpubr`packages. I also load all the functions I will use in a notebook here in the first code chunk as well. I included the function `create_dt` to make beatiful looking interactive tables that uses the `DT` package below. 
 
-```{r load_packages_functions}
+```{r load_packages_functions, warning=FALSE}
 
 
 ### Packages
