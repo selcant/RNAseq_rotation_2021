@@ -14,53 +14,160 @@ output:
 ---
 
 
-First, let's call the `here` package to set our working directory. Make sure you opened the Rstudio project. 
+First, let's call the `here` package to set our working directory. Make sure you opened the Rstudio project. This should tell us that we are at /path-to-git-repo/RNAseq_rotation_2021 . I am also loading the `tidyverse` and `ggpubr`packages. I also load all the functions I will use in a notebook here in the first code chunk as well. I included the function `create_dt` to make beatiful looking interactive tables that uses the `DT` package below. 
 
-```{r}
+```{r load_packages_functions}
+
+
+### Packages
+library(ggpubr)
+library(tidyverse)
 library(here) # you can install it if you don't have it: install.packages("here")
+
+
+### Functions
+# Making downloadable data tables
+# https://www.r-bloggers.com/vignette-downloadable-tables-in-rmarkdown-with-the-dt-package/
+create_dt <- function(x){
+  DT::datatable(x,
+                extensions = 'Buttons',
+                rownames = FALSE, filter="top",
+                options = list(dom = 'Blfrtip',
+                               buttons = c('copy', 'csv', 'excel'),
+                               pageLength = 10, scrollX=T))
+}
+
+
 ```
 
-We just installed "here" package so I am going to use 'renv::snapshot" to record it:
-
+You can record all the new packages installed using the `snapshot` function from `renv` package. 
 ```{r}
 renv::snapshot()
 ```
 
 
 
-
-
-This should tell us that we are at /path-to-git-repo/RNAseq_rotation_2021 . 
-
-Let's now load in the data, it should be at /path-to-git-repo/RNAseq_rotation_2021/_data 
+Let's now load in the data, it should be  located at /path-to-git-repo/RNAseq_rotation_2021/_data 
 
 ```{r}
 loaded_data <- load(here("_data","DO_mESC_counts_pe_r1.RData"))
 loaded_data
 ```
 
-Now we have loaded three data tables. Let's take a look at them. First, the covariates:
+Now we have loaded three data tables. I will convert them to tibbles, then use `datatable` function from `DT` package to display the first couple lines as examples.
 
 ```{r}
-esc_covar 
+esc_covar %>% 
+  as_tibble() %>% 
+  create_dt()
 ```
 
-the row names are the gene names
-the column names are sample ids
-
-
-Gene expression counts from only first set of reads (esc_raw_expr_r1):
-
-
+Gene expression counts from only first set of reads (esc_raw_expr_r1) and the rownames are ensembl gene ids.
 
 ```{r}
-esc_raw_expr_r1[1:5,1:5]
+esc_raw_expr_r1 %>% 
+  as_tibble( rownames = "ensembl_gene_id") %>% # convert to tibble with the rownames as a new column labeled ensembl_gene_id
+  select(1:6) %>%  # select first 5 columns
+  slice( 1:10) %>%  # slice first 5 rows
+  create_dt() # formatting
 ```
 
 
 Gene expression counts from paired end reads (esc_raw_expr_pe):
 
 ```{r}
-esc_raw_expr_pe[1:5,1:5]
+esc_raw_expr_pe %>% 
+  as_tibble( rownames = "ensembl_gene_id") %>%  # convert to tibble with the rownames as a new column labeled ensembl_gene_id
+  select(1:5) %>%  # select first 5 columns
+  slice( 1:5) %>%  # slice first 5 rows
+  create_dt() # formatting
 ```
 
+
+## Subsetting and plotting with data
+
+First, let's convert the data tables into tibbles and save into new variables for easy access.
+
+```{r make_tibbles}
+esc_raw_expr_r1 %>% 
+  as_tibble( rownames = "ensembl_gene_id") -> esc_raw_expr_r1_tibble # saving the tibble version to a new variable
+
+esc_raw_expr_pe %>% 
+  as_tibble( rownames = "ensembl_gene_id") -> esc_raw_expr_pe_tibble # saving the tibble version to a new variable
+
+esc_covar %>% 
+  as_tibble() -> esc_covar_tibble # saving the tibble version to a new variable
+
+```
+
+
+### Comparing counts of across samples: Scatterplot
+
+```{r sample_correlation, fig.height=4, fig.width=6}
+
+esc_raw_expr_r1_tibble %>% 
+  ggplot() + # calling the plotting function
+  aes( x = `ENSMUSG00000000001	`, 
+       y = `PB357.07_repA`) + # now we can set the aesthetics, what goes on which axes, what color... you can use variable/column names inside here.
+  geom_point( size = 2 ) + # now we call the type of plot we want to see. in this case we want points. and set related parameters.
+  theme_pubclean() # theme: visual properties of the plot.
+
+```
+
+### Gene expression count distribution: Histogram
+
+```{r histogram_example, fig.width=6, fig.height=4}
+
+esc_raw_expr_r1_tibble  %>% 
+  ggplot() + # call ggplot to make the plot!
+  aes( x = `PB357.02_repA`) + # aesthetics determine which variable is being plotted and how it is being used. you can use column names here. 
+  geom_histogram( bins = 1000, col = "blue", alpha = 0.5) + # which plot to show
+  geom_histogram( aes( x = `PB357.07_repA`), col = "red", bins = 1000, alpha = 0.4)+
+  theme_pubclean() +
+  scale_x_log10()
+
+```
+
+### Gene expression count distribution: Density plot
+
+```{r density_example}
+
+esc_raw_expr_r1_tibble  %>% 
+  ggplot() + # call ggplot to make the plot!
+  aes( x = `PB357.02_repA`) + # aesthetics determine which variable is being plotted and how it is being used. you can use column names here. 
+  geom_density(  col = "blue", alpha = 0.5, adjust = 0.5) + # which plot to show
+  geom_density( aes( x = `PB357.07_repA`), col = "red",  alpha = 0.1, adjust =0.5)+
+  theme_pubclean() +
+  scale_x_log10()
+
+```
+
+
+
+### Comparing counts of genes: Scatterplot
+
+We can transpose the data table and then convert to a tibble to get genes on columns and samples in rows. 
+
+```{r}
+esc_raw_expr_r1 %>% 
+  t() %>% 
+  as_tibble( rownames = "sample_id") -> esc_raw_expr_r1_tibble_t
+
+esc_raw_expr_r1_tibble_t %>% 
+  slice(1:6) %>% 
+  select(1:10) %>% 
+ create_dt()
+
+```
+
+
+```{r gene_correlation, fig.height=4, fig.width=6}
+
+esc_raw_expr_r1_tibble_t %>% 
+  ggplot() + # calling the plotting function
+  aes( x = `ENSMUSG00000000056`, 
+       y = `ENSMUSG00000000028`, color = sample_id) + # now we can set the aesthetics, what goes on which axes, what color... you can use variable/column names inside here.
+  geom_point( size = 2 ) + # now we call the type of plot we want to see. in this case we want points. and set related parameters.
+  theme_pubclean() # theme: visual properties of the plot.
+
+```
