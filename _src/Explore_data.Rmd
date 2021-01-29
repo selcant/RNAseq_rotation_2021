@@ -114,6 +114,12 @@ esc_raw_expr_r1_tibble %>%
 
 ```
 
+```{r}
+esc_raw_expr_r1_tibble %>%slice(1:5) %>% 
+  ggplot() + geom_bar(mapping = (aes(x =`PB357.07_repA`, fill =ensembl_gene_id)))
+```
+
+
 ### Gene expression count distribution: Histogram
 
 ```{r histogram_example, fig.width=6, fig.height=4}
@@ -163,7 +169,7 @@ esc_raw_expr_r1_tibble_t %>%
 
 ```{r gene_correlation, fig.height=4, fig.width=6}
 
-esc_raw_expr_r1_tibble_t %>% 
+esc_raw_expr_r1_tibble_t %>% slice(1:10) %>% 
   ggplot() + # calling the plotting function
   aes( x = `ENSMUSG00000000056`, 
        y = `ENSMUSG00000000028`, color = sample_id) + # now we can set the aesthetics, what goes on which axes, what color... you can use variable/column names inside here.
@@ -171,3 +177,35 @@ esc_raw_expr_r1_tibble_t %>%
   theme_pubclean() # theme: visual properties of the plot.
 
 ```
+
+```{r}
+esc_raw_expr_r1_tibble_t %>% slice(1:2) %>% 
+  ggplot() + # calling the plotting function
+  aes( x = `ENSMUSG00000000056`, 
+       y = `ENSMUSG00000000028`, shape = sample_id) + # now we can set the aesthetics, what goes on which axes, what color... you can use variable/column names inside here.
+  geom_point( size = 2 ) + # now we call the type of plot we want to see. in this case we want points. and set related parameters.
+  theme_pubclean() # theme: visual properties of the plot.
+```
+
+
+```{r}
+esc_raw_expr_r1_tibble_t %>% slice(1:2) %>% 
+  ggplot() + geom_bar(mapping = (aes(x =`ENSMUSG00000000028`, fill = sample_id)))
+ 
+```
+
+```{r}
+esc_raw_expr_r1_tibble_t %>% slice(1:10) %>% 
+  ggplot() + # calling the plotting function
+  aes( x = `ENSMUSG00000000056`, 
+       y = `ENSMUSG00000000028`, color = sample_id) + # now we can set the aesthetics, what goes on which axes, what color... you can use variable/column names inside here.
+  geom_point() + # now we call the type of plot we want to see. in this case we want points. and set related parameters.
+  theme_pubclean() # theme: visual properties of the plot.
+```
+
+
+working on pivot longer code
+```{r}
+esc_raw_expr_r1_tibble_t %>% slice(1:5) %>% select (1:10) %>% pivot_longer()
+```
+
