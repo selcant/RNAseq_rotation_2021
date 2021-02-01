@@ -14,11 +14,13 @@ output:
     theme: flatly
 ---
 
+# Setup and initial examples
+
+## Load packages and functions
 
 First, let's call the `here` package to set our working directory. Make sure you opened the Rstudio project. This should tell us that we are at /path-to-git-repo/RNAseq_rotation_2021 . I am also loading the `tidyverse` and `ggpubr`packages. I also load all the functions I will use in a notebook here in the first code chunk as well. I included the function `create_dt` to make beatiful looking interactive tables that uses the `DT` package below. 
 
 ```{r load_packages_functions, warning=FALSE}
-
 
 ### Packages
 library(ggpubr)
@@ -46,7 +48,7 @@ You can record all the new packages installed using the `snapshot` function from
 renv::snapshot()
 ```
 
-
+## Load data
 
 Let's now load in the data, it should be  located at /path-to-git-repo/RNAseq_rotation_2021/_data 
 
@@ -73,7 +75,6 @@ esc_raw_expr_r1 %>%
   create_dt() # formatting
 ```
 
-
 Gene expression counts from paired end reads (esc_raw_expr_pe):
 
 ```{r}
@@ -85,7 +86,7 @@ esc_raw_expr_pe %>%
 ```
 
 
-## Subsetting and plotting with data
+## Subset, reformat and plot
 
 First, let's convert the data tables into tibbles and save into new variables for easy access.
 
@@ -143,8 +144,6 @@ esc_raw_expr_r1_tibble  %>%
 
 ```
 
-
-
 ### Comparing counts of genes: Scatterplot
 
 We can transpose the data table and then convert to a tibble to get genes on columns and samples in rows. 
@@ -172,3 +171,62 @@ esc_raw_expr_r1_tibble_t %>%
   theme_pubclean() # theme: visual properties of the plot.
 
 ```
+
+# Comparing data sets
+
+Let's start comparing the two data sets. 
+
+## Exercise 1: Plot mean gene expression distribution across each data set. 
+
+```{r mean_gene_expression_histogram_read1, fig.width=8, fig.height=6}
+
+# add code here
+
+```
+
+```{r mean_gene_expression_histogram_pe, fig.width=8, fig.height=6}}
+
+# add code here
+
+```
+
+
+## Exercise 2: Plot mean gene expression distribution of both datasets on the same plot and color differently.
+
+```{r histogram_read1_pe}
+
+# add code here
+
+```
+
+## Exercise 3: Identify most/least variable (n = 1000) genes and look at overlap.
+
+## Exercise 4: Highlight common most/least variable genes in each data set.
+
+## Exercise 5: Compare the mean gene expression of a single gene between the two datasets. 
+
+Pick a few genes and compare transcript abundance across the two data sets. Do they have similar means or variation? What kind of plot would you make to visualize your results? Which statistics would you use to look at the agreement between the two data sets? 
+
+## Exercise 6: Please make a scatterplot containing a regression line, pearson's R and p-value of the agreement looking at transcript abundance of a single gene across the two data sets. 
+
+## Exercise 7: Add sample annotation (ex: sex of the samples) and re-make the plots with sex annotation. 
+
+In which plots would it make a difference? Do you have to remake all of them? What else can you add to the sample annotation? 
+
+# DESeq2
+
+Here is the tutorial for DESEQ2: http://www.bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html
+
+## Exercise 8: Which expression matrix would we use in DESeq2? Expression matrix containing raw values or normalized/batch corrected values?
+
+## Exercise 9: Can you convert the data tables containing transcript abundance and covarietes to the format that DESeq2 wants? What formula will you use to describe the covariates?
+
+## Exercise 10: Subset the data tables to 5 male/female cell lines and convert to DESeq2 format.
+
+## Exercise 11: Run DESeq2 with the PE read data set and compare Male/Female lines to each other.
+
+## Exercise 12: Run DESeq2 with the both data sets and compare PE/single read counts to each other.
+
+
+
+
