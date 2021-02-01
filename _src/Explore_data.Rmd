@@ -103,14 +103,14 @@ esc_covar %>%
 ```
 
 
-### Comparing counts of across samples: Scatterplot
+### Comparing counts across samples: Scatterplot
 
 ```{r sample_correlation, fig.height=4, fig.width=6}
 
 esc_raw_expr_r1_tibble %>% 
   ggplot() + # calling the plotting function
-  aes( x = `ENSMUSG00000000001	`, 
-       y = `PB357.07_repA`) + # now we can set the aesthetics, what goes on which axes, what color... you can use variable/column names inside here.
+  aes( y = PB357.07_repA, 
+       x = PB357.09_repA) + # now we can set the aesthetics, what goes on which axes, what color... you can use variable/column names inside here.
   geom_point( size = 2 ) + # now we call the type of plot we want to see. in this case we want points. and set related parameters.
   theme_pubclean() # theme: visual properties of the plot.
 
@@ -166,8 +166,10 @@ esc_raw_expr_r1_tibble_t %>%
 esc_raw_expr_r1_tibble_t %>% 
   ggplot() + # calling the plotting function
   aes( x = `ENSMUSG00000000056`, 
-       y = `ENSMUSG00000000028`, color = sample_id) + # now we can set the aesthetics, what goes on which axes, what color... you can use variable/column names inside here.
-  geom_point( size = 2 ) + # now we call the type of plot we want to see. in this case we want points. and set related parameters.
+       y = `ENSMUSG00000000028`, 
+       color = sample_id) + # now we can set the aesthetics, what goes on which axes, what color... you can use variable/column names inside here.
+  geom_point( size = 2 , # now we call the type of plot we want to see. in this case we want points. and set related parameters.
+              show.legend = FALSE) + 
   theme_pubclean() # theme: visual properties of the plot.
 
 ```
