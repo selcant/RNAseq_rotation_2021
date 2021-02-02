@@ -57,10 +57,18 @@ renv::snapshot()
 
 Let's now load in the data, it should be  located at /path-to-git-repo/RNAseq_rotation_2021/_data 
 
+##loading paired end data
 ```{r}
-loaded_data <- load(here("_data","DO_mESC_counts_pe_r1.RData"))
-loaded_data
+mESC_paired_end<-  load("~/git/RNAseq_rotation_2021/_data/DO185_mESC_emase_m4_noProbs_correctedIDs_02012021.RData")
+mESC_paired_end
 ```
+
+##loading r1 data
+```{r}
+mESC_r1<-load("~/git/RNAseq_rotation_2021/_data/DO185_mESC_emase_m4_noProbs_correctedIDs_02012021.RData")
+mESC_r1
+```
+
 
 Now we have loaded three data tables. I will convert them to tibbles, then use `datatable` function from `DT` package to display the first couple lines as examples.
 
