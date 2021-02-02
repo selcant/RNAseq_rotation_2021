@@ -21,13 +21,10 @@ First, let's call the `here` package to set our working directory. Make sure you
 
 ```{r load_packages_functions}
 
-=======
 ## Load packages and functions
 
-First, let's call the `here` package to set our working directory. Make sure you opened the Rstudio project. This should tell us that we are at /path-to-git-repo/RNAseq_rotation_2021 . I am also loading the `tidyverse` and `ggpubr`packages. I also load all the functions I will use in a notebook here in the first code chunk as well. I included the function `create_dt` to make beatiful looking interactive tables that uses the `DT` package below. 
+#First, let's call the `here` package to set our working directory. Make sure you opened the Rstudio project. This should tell us that we are at /path-to-git-repo/RNAseq_rotation_2021 . I am also loading the `tidyverse` and `ggpubr`packages. I also load all the functions I will use in a notebook here in the first code chunk as well. I included the function `create_dt` to make beatiful looking interactive tables that uses the `DT` package below. 
 
-```{r load_packages_functions, warning=FALSE}
->>>>>>> origin/sa_dev
 
 ### Packages
 library(ggpubr)
@@ -55,11 +52,8 @@ You can record all the new packages installed using the `snapshot` function from
 renv::snapshot()
 ```
 
-<<<<<<< HEAD
 
-=======
 ## Load data
->>>>>>> origin/sa_dev
 
 Let's now load in the data, it should be  located at /path-to-git-repo/RNAseq_rotation_2021/_data 
 
@@ -94,7 +88,6 @@ esc_raw_expr_pe %>%
   select(1:5) %>%  # select first 5 columns
   slice( 1:5) %>%  # slice first 5 rows
   create_dt() # formatting
-<<<<<<< HEAD
 ```
 
 
@@ -221,8 +214,7 @@ esc_raw_expr_r1_tibble_t %>% slice(1:10) %>%
 working on pivot longer code
 ```{r}
 esc_raw_expr_r1_tibble_t %>% slice(1:5) %>% select (1:10) %>% pivot_longer()
-=======
->>>>>>> origin/sa_dev
+
 ```
 
 
