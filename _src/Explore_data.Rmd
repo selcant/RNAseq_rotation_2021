@@ -49,7 +49,7 @@ create_dt <- function(x){
 
 You can record all the new packages installed using the `snapshot` function from `renv` package. 
 ```{r}
-renv::snapshot()
+renv::settings$snapshot.type("simple")
 ```
 
 
@@ -62,6 +62,17 @@ Let's now load in the data, it should be  located at /path-to-git-repo/RNAseq_ro
 mESC_paired_end<-  load("~/git/RNAseq_rotation_2021/_data/DO185_mESC_emase_m4_noProbs_correctedIDs_02012021.RData")
 mESC_paired_end
 ```
+```{r}
+esc_expr_pe <- expr 
+
+esc_raw_expr_pe <- raw.expr
+
+esc_covar_pe <- covar 
+
+rm(expr, covar, raw.expr, exprNotes, mixupNotes)
+
+```
+
 
 ##loading r1 data
 ```{r}
@@ -69,14 +80,32 @@ mESC_r1<-load("~/git/RNAseq_rotation_2021/_data/DO185_mESC_emase_m4_noProbs_corr
 mESC_r1
 ```
 
+```{r}
+esc_expr_r1 <- expr 
 
-Now we have loaded three data tables. I will convert them to tibbles, then use `datatable` function from `DT` package to display the first couple lines as examples.
+esc_raw_expr_r1 <- raw.expr
+
+esc_covar_r1<- covar 
+
+rm(expr, covar, raw.expr, exprNotes, mixupNotes)
+
+```
+
+
+ I will convert them to tibbles, then use `datatable` function from `DT` package to display the first couple lines as examples.
 
 ```{r}
-esc_covar %>% 
-  as_tibble() %>% 
+esc_raw_expr_r1 %>% 
+  as_tibble(rownames = "ensembl_gene_id") %>% 
+ select (1:1000) %>%
   create_dt()
 ```
+
+```{r}
+expr %>%
+  as_tibble (rownames = "ensembl_gene_id") -> mESC_paired_end_expr
+```
+
 
 Gene expression counts from only first set of reads (esc_raw_expr_r1) and the rownames are ensembl gene ids.
 
@@ -85,16 +114,6 @@ esc_raw_expr_r1 %>%
   as_tibble( rownames = "ensembl_gene_id") %>% # convert to tibble with the rownames as a new column labeled ensembl_gene_id
   select(1:6) %>%  # select first 5 columns
   slice( 1:10) %>%  # slice first 5 rows
-  create_dt() # formatting
-```
-
-Gene expression counts from paired end reads (esc_raw_expr_pe):
-
-```{r}
-esc_raw_expr_pe %>% 
-  as_tibble( rownames = "ensembl_gene_id") %>%  # convert to tibble with the rownames as a new column labeled ensembl_gene_id
-  select(1:5) %>%  # select first 5 columns
-  slice( 1:5) %>%  # slice first 5 rows
   create_dt() # formatting
 ```
 
@@ -320,10 +339,22 @@ Let's start comparing the two data sets.
 
 ## Exercise 1: Plot mean gene expression distribution across each data set. 
 
-```{r mean_gene_expression_histogram_read1, fig.width=8, fig.height=6}
+```{r}
+mESC_paired_end_expr %>% 
+  t() %>% 
+  as_tibble( rownames = "sample_id") -> mESC_paired_end_expr_t
 
-# add code here
+```
 
+
+```{r}
+mESC_paired_end_expr_t %>%
+  select (1:1000) %>%
+  create_dt()
+```
+
+```{r}
+colMeans(mESC_paired_end_expr_t)
 ```
 
 ```{r mean_gene_expression_histogram_pe, fig.width=8, fig.height=6}}
