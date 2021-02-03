@@ -18,9 +18,9 @@ output:
 
 ## Load packages and functions
 
-First, let's call the `here` package to set our working directory. Make sure you opened the Rstudio project. This should tell us that we are at /path-to-git-repo/RNAseq_rotation_2021 . I am also loading the `tidyverse` and `ggpubr`packages. I also load all the functions I will use in a notebook here in the first code chunk as well. I included the function `create_dt` to make beatiful looking interactive tables that uses the `DT` package below. 
+First, let's call the `here` package to set our working directory. Make sure you opened the Rstudio project. This should tell us that we are at /path-to-git-repo/RNAseq_rotation_2021 . I am also loading the `tidyverse` and `ggpubr`packages. I also load all the functions I will use in a notebook here in the first code chunk as well. I included the function `create_dt` to make beatiful looking interactive tables that uses the `DT` package below.
 
-```{r load_packages_functions, warning=FALSE}
+```{r load_packages_functions, warning=FALSE, message=FALSE}
 
 ### Packages
 library(ggpubr)
@@ -43,18 +43,32 @@ create_dt <- function(x){
 
 ```
 
-You can record all the new packages installed using the `snapshot` function from `renv` package. 
+You can record all the new packages installed using the `snapshot` function from `renv` package.
+
 ```{r}
 renv::snapshot()
 ```
 
 ## Load data
 
-Let's now load in the data, it should be  located at /path-to-git-repo/RNAseq_rotation_2021/_data 
+Let's now load in the data, it should be located at /path-to-git-repo/RNAseq_rotation_2021/\_data
 
-```{r}
-loaded_data <- load(here("_data","DO_mESC_counts_pe_r1.RData"))
-loaded_data
+```{r load_data_r1_pe}
+
+# load the R1 - single read data first
+r1_data <- load(here("_data","DO185_mESC_emase_m4_noProbs_correctedIDs_02012021.RData"))
+esc_expr_r1 <- expr # cleaned, normalized, single read, R1
+esc_raw_expr_r1 <- raw.expr # raw data, only filtered not normalized
+rm(matches, exprNotes, mixupNotes, DO185_mESC_emase_m4.cmd, expr, raw.expr)
+
+pe_data <- load(here("_data","DO185_mESC_paired_emase_m4_noProbs_correctedIDs_02012021.RData"))
+esc_expr_pe <- expr # cleaned, normalized, paired end data
+esc_raw_expr_pe <- raw.expr # only filtered not normalized
+rm(matches, exprNotes, mixupNotes, DO185_mESC_emase_m4.cmd, expr, raw.expr)
+
+
+esc_covar <- covarTidy
+esc_covar_mat <- covar
 ```
 
 Now we have loaded three data tables. I will convert them to tibbles, then use `datatable` function from `DT` package to display the first couple lines as examples.
@@ -85,7 +99,6 @@ esc_raw_expr_pe %>%
   create_dt() # formatting
 ```
 
-
 ## Subset, reformat and plot
 
 First, let's convert the data tables into tibbles and save into new variables for easy access.
@@ -102,15 +115,14 @@ esc_covar %>%
 
 ```
 
-
 ### Comparing counts across samples: Scatterplot
 
 ```{r sample_correlation, fig.height=4, fig.width=6}
 
 esc_raw_expr_r1_tibble %>% 
   ggplot() + # calling the plotting function
-  aes( y = PB357.07_repA, 
-       x = PB357.09_repA) + # now we can set the aesthetics, what goes on which axes, what color... you can use variable/column names inside here.
+  aes( y = PB366.18_repA, 
+       x = PB357.12_repA) + # now we can set the aesthetics, what goes on which axes, what color... you can use variable/column names inside here.
   geom_point( size = 2 ) + # now we call the type of plot we want to see. in this case we want points. and set related parameters.
   theme_pubclean() # theme: visual properties of the plot.
 
@@ -122,9 +134,9 @@ esc_raw_expr_r1_tibble %>%
 
 esc_raw_expr_r1_tibble  %>% 
   ggplot() + # call ggplot to make the plot!
-  aes( x = `PB357.02_repA`) + # aesthetics determine which variable is being plotted and how it is being used. you can use column names here. 
+  aes( x = `PB366.18_repA`) + # aesthetics determine which variable is being plotted and how it is being used. you can use column names here. 
   geom_histogram( bins = 1000, col = "blue", alpha = 0.5) + # which plot to show
-  geom_histogram( aes( x = `PB357.07_repA`), col = "red", bins = 1000, alpha = 0.4)+
+  geom_histogram( aes( x = `PB357.12_repA`), col = "red", bins = 1000, alpha = 0.4)+
   theme_pubclean() +
   scale_x_log10()
 
@@ -136,9 +148,9 @@ esc_raw_expr_r1_tibble  %>%
 
 esc_raw_expr_r1_tibble  %>% 
   ggplot() + # call ggplot to make the plot!
-  aes( x = `PB357.02_repA`) + # aesthetics determine which variable is being plotted and how it is being used. you can use column names here. 
+  aes( x = `PB366.18_repA`) + # aesthetics determine which variable is being plotted and how it is being used. you can use column names here. 
   geom_density(  col = "blue", alpha = 0.5, adjust = 0.5) + # which plot to show
-  geom_density( aes( x = `PB357.07_repA`), col = "red",  alpha = 0.1, adjust =0.5)+
+  geom_density( aes( x = `PB357.12_repA`), col = "red",  alpha = 0.1, adjust =0.5)+
   theme_pubclean() +
   scale_x_log10()
 
@@ -146,7 +158,7 @@ esc_raw_expr_r1_tibble  %>%
 
 ### Comparing counts of genes: Scatterplot
 
-We can transpose the data table and then convert to a tibble to get genes on columns and samples in rows. 
+We can transpose the data table and then convert to a tibble to get genes on columns and samples in rows.
 
 ```{r}
 esc_raw_expr_r1 %>% 
@@ -159,7 +171,6 @@ esc_raw_expr_r1_tibble_t %>%
  create_dt()
 
 ```
-
 
 ```{r gene_correlation, fig.height=4, fig.width=6}
 
@@ -174,15 +185,57 @@ esc_raw_expr_r1_tibble_t %>%
 
 ```
 
+# Processing the data
+
+Here is how this data have been processed so far. Note that we will do more before genetic mapping (batch correction using `comBAT` function from the `sva` package and rank normalization).
+
+First, we filter genes that are expressed at very low levels using both the counts and the total reads per million (tpm) retrieved from EMASE.
+
+**Question: What is tpm? What is the difference between the counts and tpm values we get from EMASE?**
+
+```{r echo =TRUE, eval =FALSE}
+# Take genes with tpm > 0.5 and >50% nonzero counts
+final <- inner_join(counts, tpm) %>%
+  group_by(locus) %>%
+  filter(median(tpm) > 0.5, mean(count == 0) < 0.5) %>%
+  select(-tpm)
+```
+
+Next, we do upper quartile normalization using the code below:
+
+```{r echo =TRUE, eval =FALSE}
+finalmat <- dplyr::select(final, -sample, -rep) %>%
+  spread(id, count) %>%
+  remove_rownames() %>%
+  as.data.frame() %>%
+  column_to_rownames(var="locus") %>%
+  as.matrix()
+q75 <- apply(finalmat, 2, quantile, 0.75)
+ratio <- mean(q75)/q75
+finalmat2 <- sweep(finalmat, 2, ratio, FUN="*")
+```
+
 # Comparing data sets
 
-Let's start comparing the two data sets. 
+Let's start comparing the two data sets.
 
-## Exercise 1: Plot mean gene expression distribution across each data set. 
+## Exercise 1: Plot mean gene expression distribution across each data set.
 
-```{r mean_gene_expression_histogram_read1, fig.width=8, fig.height=6}
+```{r mean_gene_expression_histogram_read1, fig.width=6, fig.height=4}
 
 # add code here
+
+esc_raw_expr_r1_tibble_t %>% 
+  summarise_if( is.numeric, mean) %>% 
+  t() %>% 
+  as_tibble(rownames = 'ensembl_gene_id') %>% 
+  rename( "mean" = "V1") -> esc_raw_r1_mean
+
+esc_raw_r1_mean %>% 
+  ggplot()+
+  aes( x = mean)+
+  geom_histogram( bins =1000)+
+  theme_pubclean()
 
 ```
 
@@ -191,7 +244,6 @@ Let's start comparing the two data sets.
 # add code here
 
 ```
-
 
 ## Exercise 2: Plot mean gene expression distribution of both datasets on the same plot and color differently.
 
@@ -205,19 +257,19 @@ Let's start comparing the two data sets.
 
 ## Exercise 4: Highlight common most/least variable genes in each data set.
 
-## Exercise 5: Compare the mean gene expression of a single gene between the two datasets. 
+## Exercise 5: Compare the mean gene expression of a single gene between the two datasets.
 
-Pick a few genes and compare transcript abundance across the two data sets. Do they have similar means or variation? What kind of plot would you make to visualize your results? Which statistics would you use to look at the agreement between the two data sets? 
+Pick a few genes and compare transcript abundance across the two data sets. Do they have similar means or variation? What kind of plot would you make to visualize your results? Which statistics would you use to look at the agreement between the two data sets?
 
-## Exercise 6: Please make a scatterplot containing a regression line, pearson's R and p-value of the agreement looking at transcript abundance of a single gene across the two data sets. 
+## Exercise 6: Please make a scatterplot containing a regression line, pearson's R and p-value of the agreement looking at transcript abundance of a single gene across the two data sets.
 
-## Exercise 7: Add sample annotation (ex: sex of the samples) and re-make the plots with sex annotation. 
+## Exercise 7: Add sample annotation (ex: sex of the samples) and re-make the plots with sex annotation.
 
-In which plots would it make a difference? Do you have to remake all of them? What else can you add to the sample annotation? 
+In which plots would it make a difference? Do you have to remake all of them? What else can you add to the sample annotation?
 
 # DESeq2
 
-Here is the tutorial for DESEQ2: http://www.bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html
+Here is the tutorial for DESEQ2: <http://www.bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html>
 
 ## Exercise 8: Which expression matrix would we use in DESeq2? Expression matrix containing raw values or normalized/batch corrected values?
 
@@ -228,7 +280,3 @@ Here is the tutorial for DESEQ2: http://www.bioconductor.org/packages/release/bi
 ## Exercise 11: Run DESeq2 with the PE read data set and compare Male/Female lines to each other.
 
 ## Exercise 12: Run DESeq2 with the both data sets and compare PE/single read counts to each other.
-
-
-
-
