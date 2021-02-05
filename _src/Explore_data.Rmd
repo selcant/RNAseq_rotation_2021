@@ -62,6 +62,7 @@ Let's now load in the data, it should be  located at /path-to-git-repo/RNAseq_ro
 mESC_paired_end<-  load("~/git/RNAseq_rotation_2021/_data/DO185_mESC_emase_m4_noProbs_correctedIDs_02012021.RData")
 mESC_paired_end
 ```
+
 ```{r}
 esc_expr_pe <- expr 
 
@@ -92,22 +93,22 @@ rm(expr, covar, raw.expr, exprNotes, mixupNotes)
 ```
 
 
- I will convert them to tibbles, then use `datatable` function from `DT` package to display the first couple lines as examples.
+ ##Converting the data sets to tibbles and saving as new variables
 
 ```{r}
-esc_raw_expr_r1 %>% 
-  as_tibble(rownames = "ensembl_gene_id") %>% 
- select (1:1000) %>%
-  create_dt()
-```
+esc_expr_pe %>% 
+  as_tibble(rownames = "ensembl_gene_id") -> esc_expr_pe_tibble
 
-```{r}
-expr %>%
-  as_tibble (rownames = "ensembl_gene_id") -> mESC_paired_end_expr
+esc_expr_r1 %>%
+  as_tibble(rownames = "ensembl_gene_id") -> esc_expr_r1_tibble
+ 
 ```
 
 
-Gene expression counts from only first set of reads (esc_raw_expr_r1) and the rownames are ensembl gene ids.
+
+
+
+##Converting the data set to tibbles then making a data table
 
 ```{r}
 esc_raw_expr_r1 %>% 
@@ -117,22 +118,6 @@ esc_raw_expr_r1 %>%
   create_dt() # formatting
 ```
 
-
-## Subsetting and plotting with data
-
-First, let's convert the data tables into tibbles and save into new variables for easy access.
-
-```{r make_tibbles}
-esc_raw_expr_r1 %>% 
-  as_tibble( rownames = "ensembl_gene_id") -> esc_raw_expr_r1_tibble # saving the tibble version to a new variable
-
-esc_raw_expr_pe %>% 
-  as_tibble( rownames = "ensembl_gene_id") -> esc_raw_expr_pe_tibble # saving the tibble version to a new variable
-
-esc_covar %>% 
-  as_tibble() -> esc_covar_tibble # saving the tibble version to a new variable
-
-```
 
 
 ### Comparing counts of across samples: Scatterplot
@@ -238,30 +223,6 @@ esc_raw_expr_r1_tibble_t %>% slice(1:10) %>%
 ```
 
 
-working on pivot longer code
-```{r}
-esc_raw_expr_r1_tibble_t %>% slice(1:5) %>% select (1:10) %>% pivot_longer()
-
-```
-
-
-## Subset, reformat and plot
-
-First, let's convert the data tables into tibbles and save into new variables for easy access.
-
-```{r make_tibbles}
-esc_raw_expr_r1 %>% 
-  as_tibble( rownames = "ensembl_gene_id") -> esc_raw_expr_r1_tibble # saving the tibble version to a new variable
-
-esc_raw_expr_pe %>% 
-  as_tibble( rownames = "ensembl_gene_id") -> esc_raw_expr_pe_tibble # saving the tibble version to a new variable
-
-esc_covar %>% 
-  as_tibble() -> esc_covar_tibble # saving the tibble version to a new variable
-
-```
-
-
 ### Comparing counts across samples: Scatterplot
 
 ```{r sample_correlation, fig.height=4, fig.width=6}
@@ -339,48 +300,138 @@ Let's start comparing the two data sets.
 
 ## Exercise 1: Plot mean gene expression distribution across each data set. 
 
+We can transpose the data table and then convert to a tibble to get genes on columns and samples in rows. 
+
 ```{r}
-mESC_paired_end_expr %>% 
+esc_expr_pe_tibble %>%
+ as.matrix(rownames = 'emsembl_gene_id')-> esc_expr_pe_matrix 
+ 
+esc_expr_pe_matrix [1:5, 1:6] %>%
+  summarise_if(is.numeric, mean) %>%
+  t() -> esc_expr_pe_matrix_t_mean
+```
+
+esc_expr_pe_tibble [1:1000,] %>%
+  t()
+  as_tibble( rownames = "sample_id", colnames = gene_names) -> esc_expr_pe_tibble_t
+
+```{r mean_gene_expression_histogram_pe, fig.width=10, fig.height=8 }
+esc_expr_pe_tibble  %>% 
+  summarise_if( is.numeric, mean) %>% 
   t() %>% 
-  as_tibble( rownames = "sample_id") -> mESC_paired_end_expr_t
+  as_tibble(rownames = 'ensembl_gene_id') %>% 
+  rename( "mean" = "V1") -> esc_expr_pe_mean
+##Does this not show the expression of all genes for a single sample? do we not want to see the expression of all samples for a single gene?##
 
+
+##playing with code
+esc_expr_r1_tibble [1:1000,]%>% 
+  summarise_if( is.numeric, mean)%>% 
+  t() %>% 
+  as_tibble(rownames = 'ensembl_gene_id') %>%
+  rename( "mean" = "V1") -> esc_expr_r1_mean
+
+esc_expr_r1_tibble [1:1000,]%>% 
+  rowwise() %>%
+  summarise_if( is.numeric, mean) -> mean
+
+  mutate(mean_all = rowMeans)
+  ##
+  
+esc_expr_pe_mean %>% 
+  ggplot()+
+  aes( x = mean)+
+  geom_histogram( bins =100, colour = "black", fill = "light blue")+
+  theme_pubclean()
 ```
 
 
-```{r}
-mESC_paired_end_expr_t %>%
-  select (1:1000) %>%
-  create_dt()
-```
+```{r mean_gene_expression_histogram_rq, fig.width=10, fig.height=8 }
+esc_expr_r1_tibble %>% 
+  summarise_if( is.numeric, mean) %>% 
+  t() %>% 
+  as_tibble(rownames = 'ensembl_gene_id') %>%
+  rename( "mean" = "V1") -> esc_expr_r1_mean
 
-```{r}
-colMeans(mESC_paired_end_expr_t)
-```
-
-```{r mean_gene_expression_histogram_pe, fig.width=8, fig.height=6}}
-
-# add code here
-
+esc_expr_r1_mean %>% 
+  ggplot()+
+  aes( x = mean)+
+  geom_histogram( bins =100, colour = "black", fill = "light green")+
+  theme_pubclean()
 ```
 
 
 ## Exercise 2: Plot mean gene expression distribution of both datasets on the same plot and color differently.
 
-```{r histogram_read1_pe}
+```{r mean_gene_expression_histogram_pe_r1, fig.width=10, fig.height=8}
+##histogram for distribution
+pe_r1_means <- dplyr::bind_rows(list(pe_mean = esc_expr_pe_mean, r1_mean = esc_expr_r1_mean), .id = "dataset")
 
-# add code here
+ggplot(pe_r1_means, aes(mean, fill = dataset,))+
+   scale_fill_manual(values=c("light green","red"))+
+   geom_histogram(bins = 100,position="dodge")
 
+##density plot for distribution
+ggplot(pe_r1_means, aes(mean, fill = dataset,))+
+   scale_fill_manual(values=c("light green","red"))+
+   geom_density(alpha = 0.2)
 ```
 
+
 ## Exercise 3: Identify most/least variable (n = 1000) genes and look at overlap.
+```{r}
+esc_expr_pe_tibble %>% 
+  summarise_if( is.numeric, sd) %>% 
+  t() %>% 
+  as_tibble(rownames = 'ensembl_gene_id') %>%
+  rename( "sd" = "V1") -> esc_expr_pe_st_dev
+
+esc_expr_pe_st_dev %>%
+  arrange(sd) -> most_var_esc_expr_pe
+
+esc_expr_pe_st_dev %>%
+  arrange(-sd) -> least_var_esc_expr_pe
+```
+
+```{r}
+esc_expr_r1_tibble %>% 
+  summarise_if( is.numeric, sd) %>% 
+  t() %>% 
+  as_tibble(rownames = 'ensembl_gene_id') %>%
+  rename( "sd" = "V1") -> esc_expr_r1_st_dev
+
+esc_expr_pe_st_dev %>%
+  arrange(sd) -> most_var_esc_expr_r1
+
+esc_expr_pe_st_dev %>%
+  arrange(-sd) -> least_var_esc_expr_r1
+```
+
 
 ## Exercise 4: Highlight common most/least variable genes in each data set.
+
+```{r}
+intersect(most_var_esc_expr_pe, most_var_esc_expr_r1)
+
+intersect(least_var_esc_expr_pe,least_var_esc_expr_r1)
+```
+
 
 ## Exercise 5: Compare the mean gene expression of a single gene between the two datasets. 
 
 Pick a few genes and compare transcript abundance across the two data sets. Do they have similar means or variation? What kind of plot would you make to visualize your results? Which statistics would you use to look at the agreement between the two data sets? 
 
 ## Exercise 6: Please make a scatterplot containing a regression line, pearson's R and p-value of the agreement looking at transcript abundance of a single gene across the two data sets. 
+
+```{r}
+esc_expr_pe_tibble %>% t() -> esc_expr_pe_tibble_t
+
+esc_expr_pe_tibble_t %>% select(1:10000) %>% 
+  ggplot() +
+  aes( x = (esc_expr_pe_tibble_t [,1])) +
+  geom_point( size = 2 ) +
+  theme_pubclean() 
+```
 
 ## Exercise 7: Add sample annotation (ex: sex of the samples) and re-make the plots with sex annotation. 
 
