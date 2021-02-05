@@ -101,7 +101,14 @@ esc_expr_pe %>%
 
 esc_expr_r1 %>%
   as_tibble(rownames = "ensembl_gene_id") -> esc_expr_r1_tibble
- 
+
+esc_expr_pe %>%
+  t() %>%
+  as_tibble( rownames = 'sample_id') -> esc_expr_pe_tibble_t
+
+ esc_expr_r1 %>%
+  t() %>%
+  as_tibble( rownames = 'sample_id') -> esc_expr_r1_tibble_t
 ```
 
 
@@ -316,7 +323,7 @@ esc_expr_pe_tibble [1:1000,] %>%
   as_tibble( rownames = "sample_id", colnames = gene_names) -> esc_expr_pe_tibble_t
 
 ```{r mean_gene_expression_histogram_pe, fig.width=10, fig.height=8 }
-esc_expr_pe_tibble  %>% 
+esc_expr_pe_tibble_t %>% select(1:1000) %>% 
   summarise_if( is.numeric, mean) %>% 
   t() %>% 
   as_tibble(rownames = 'ensembl_gene_id') %>% 
@@ -347,7 +354,7 @@ esc_expr_pe_mean %>%
 
 
 ```{r mean_gene_expression_histogram_rq, fig.width=10, fig.height=8 }
-esc_expr_r1_tibble %>% 
+esc_expr_r1_tibble_t  %>% select(1:1000) %>% 
   summarise_if( is.numeric, mean) %>% 
   t() %>% 
   as_tibble(rownames = 'ensembl_gene_id') %>%
@@ -380,7 +387,7 @@ ggplot(pe_r1_means, aes(mean, fill = dataset,))+
 
 ## Exercise 3: Identify most/least variable (n = 1000) genes and look at overlap.
 ```{r}
-esc_expr_pe_tibble %>% 
+esc_expr_pe_tibble_t %>% select(1:1000) %>% 
   summarise_if( is.numeric, sd) %>% 
   t() %>% 
   as_tibble(rownames = 'ensembl_gene_id') %>%
@@ -394,7 +401,7 @@ esc_expr_pe_st_dev %>%
 ```
 
 ```{r}
-esc_expr_r1_tibble %>% 
+esc_expr_r1_tibble_t %>% select(1:1000) %>% 
   summarise_if( is.numeric, sd) %>% 
   t() %>% 
   as_tibble(rownames = 'ensembl_gene_id') %>%
