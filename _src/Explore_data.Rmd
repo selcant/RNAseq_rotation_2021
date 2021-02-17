@@ -93,7 +93,7 @@ rm(expr, covar, raw.expr, exprNotes, mixupNotes)
 ```
 
 
- ##Converting the data sets to tibbles and saving as new variables
+ ##Converting the data sets to tibbles and saving as new variables genes in rows before transposing
 
 ```{r}
 esc_expr_pe %>% 
@@ -234,7 +234,7 @@ esc_raw_expr_r1_tibble_t %>% slice(1:10) %>%
 
 ```{r sample_correlation, fig.height=4, fig.width=6}
 
-esc_raw_expr_r1_tibble %>% 
+esc_expr_r1_tibble %>% 
   ggplot() + # calling the plotting function
   aes( y = PB357.07_repA, 
        x = PB357.09_repA) + # now we can set the aesthetics, what goes on which axes, what color... you can use variable/column names inside here.
@@ -290,7 +290,7 @@ esc_raw_expr_r1_tibble_t %>%
 
 ```{r gene_correlation, fig.height=4, fig.width=6}
 
-esc_raw_expr_r1_tibble_t %>% 
+esc_expr_r1_tibble_t %>% 
   ggplot() + # calling the plotting function
   aes( x = `ENSMUSG00000000056`, 
        y = `ENSMUSG00000000028`, 
@@ -372,12 +372,7 @@ esc_expr_r1_mean %>%
 
 ```{r mean_gene_expression_histogram_pe_r1, fig.width=10, fig.height=8}
 ##histogram for distribution
-pe_r1_means <- dplyr::bind_rows(list(pe_mean = esc_expr_pe_mean, r1_mean = esc_expr_r1_mean), .id = "dataset")
-
-ggplot(pe_r1_means, aes(mean, fill = dataset,))+
-   scale_fill_manual(values=c("light green","red"))+
-   geom_histogram(bins = 100,position="dodge")
-
+  
 ##density plot for distribution
 ggplot(pe_r1_means, aes(mean, fill = dataset,))+
    scale_fill_manual(values=c("light green","red"))+
@@ -426,18 +421,29 @@ intersect(least_var_esc_expr_pe,least_var_esc_expr_r1)
 
 ## Exercise 5: Compare the mean gene expression of a single gene between the two datasets. 
 
-Pick a few genes and compare transcript abundance across the two data sets. Do they have similar means or variation? What kind of plot would you make to visualize your results? Which statistics would you use to look at the agreement between the two data sets? 
+Pick a few genes and compare transcript abundance across the two data sets. Do they have similar means or variation? What kind of plot would you make to 
+
+###box plots would be used to visualize the difference in the mean and variation between the points across the two datapsets
+
 
 ## Exercise 6: Please make a scatterplot containing a regression line, pearson's R and p-value of the agreement looking at transcript abundance of a single gene across the two data sets. 
 
 ```{r}
-esc_expr_pe_tibble %>% t() -> esc_expr_pe_tibble_t
+colnames(esc_expr_pe_tibble) -> sample_id
 
-esc_expr_pe_tibble_t %>% select(1:10000) %>% 
+
+esc_expr_r1_tibble_t %>% 
+  ggplot() + 
+  aes( x = `ENSMUSG00000000056`,  y = `ENSMUSG00000000028`, color = sample_id) +
+  geom_point(show.legend = FALSE) +
+  theme_pubclean()
+
+
   ggplot() +
-  aes( x = (esc_expr_pe_tibble_t [,1])) +
-  geom_point( size = 2 ) +
-  theme_pubclean() 
+  geom_point(data = esc_expr_pe_tibble_t [, 1:1000], aes(x = 'ENSMUSG00000000131', y = sample_id ), show.legend = FALSE) 
+ 
+     geom_point(data = esc_expr_r1_tibble, aes(x = ' ENSMUSG00000000131'), colour = "green")
+  
 ```
 
 ## Exercise 7: Add sample annotation (ex: sex of the samples) and re-make the plots with sex annotation. 
