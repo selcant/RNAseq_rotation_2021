@@ -1,0 +1,156 @@
+---
+title: "read_comparrisons"
+author: "sherrea"
+date: "2/19/2021"
+output: html_document
+---
+
+#Start by setting the working directory and loading the requires packages
+
+```{r}
+library(here)
+library(ggpubr)
+library(tidyverse)
+```
+
+#Next I will load the paired end and read 1 data
+
+```{r}
+#loading pe data
+
+mESC_paired_end<-  load("~/git/RNAseq_rotation_2021/_data/DO185_mESC_emase_m4_noProbs_correctedIDs_02012021.RData")
+mESC_paired_end
+
+esc_expr_pe <- expr 
+
+esc_raw_expr_pe <- raw.expr
+
+esc_covar_pe <- covar 
+
+esc_matches_pe <- matches
+
+rm(expr, covar, raw.expr, exprNotes, mixupNotes, matches)
+
+
+#loading r1 data
+
+mESC_r1<-load("~/git/RNAseq_rotation_2021/_data/DO185_mESC_emase_m4_noProbs_correctedIDs_02012021.RData")
+mESC_r1
+
+esc_expr_r1 <- expr 
+
+esc_raw_expr_r1 <- raw.expr
+
+esc_covar_r1<- covar 
+
+esc_matches_r1 <- matches
+
+rm(expr, covar, raw.expr, exprNotes, mixupNotes, matches)
+
+```
+
+#Right now the genes are the rows and the sample are the columns for the expression tables. I will firt convert the expression data to tibbles, then transposes the data. At ecah step a new variable will be created.
+#At this point i will have three variuables for pe and r1 data (dataframe, converted to tibbles, transposed dataframe as a tibble).
+
+```{r}
+esc_expr_pe %>% 
+  as_tibble(rownames = "ensembl_gene_id") -> esc_expr_pe_tibble
+
+esc_expr_r1 %>%
+  as_tibble(rownames = "ensembl_gene_id") -> esc_expr_r1_tibble
+
+esc_expr_pe %>%
+  t() %>%
+  as_tibble( rownames = 'sample_id') -> esc_expr_pe_tibble_t
+
+ esc_expr_r1 %>%
+  t() %>%
+  as_tibble( rownames = 'sample_id') -> esc_expr_r1_tibble_t
+```
+
+
+#I will now start comparing the pe and r1 data. First, I wil look at the the expression of the 1000 most abundant transcripts and 1000 least abundant transcripts within each set to investigate the similarities or differences between them. I will be using the mean abundance of the transcripts.
+#I will  use scatter plots to plot the most and least abundant transcripts for each data set then look at if there are any similarities between the two data sets.
+##Slice chooses rows and select chooses columns
+
+```{r}
+esc_expr_pe_tibble_t %>% select(1:1000) %>% 
+  summarise_if( is.numeric, mean) %>% 
+  t() %>% 
+  as_tibble(rownames = 'ensembl_gene_id') %>% 
+  rename( "mean" = "V1") -> esc_expr_pe_mean
+
+esc_expr_r1_tibble_t  %>% select(1:1000) %>% 
+  summarise_if( is.numeric, mean) %>% 
+  t() %>% 
+  as_tibble(rownames = 'ensembl_gene_id') %>%
+  rename( "mean" = "V1") -> esc_expr_r1_mean
+
+esc_expr_pe_mean %>% slice (1:1000) %>%
+  arrange(mean) -> least_abundant_esc_expr_pe
+
+esc_expr_pe_mean %>% slice (1:1000) %>% 
+  arrange(-mean) -> most_abundant_esc_expr_pe
+
+esc_expr_r1_mean %>% slice (1:1000) %>%
+  arrange(mean) -> least_abundant_esc_expr_r1
+
+esc_expr_r1_mean %>% slice (1:1000) %>% 
+  arrange(-mean) -> most_abundant_esc_expr_r1
+
+```
+
+
+```{r}
+
+least_abundant_esc_expr_pe %>% slice (1:500) %>%
+  ggplot() + 
+  aes( x = ensembl_gene_id,  y = mean)  +
+  geom_col() +
+  theme_pubclean()
+
+
+most_abundant_esc_expr_pe %>%  slice (1:500) %>%
+  ggplot() + 
+  aes( x = ensembl_gene_id,  y = mean)  +
+  geom_col() +
+  theme_pubclean()
+
+
+least_abundant_esc_expr_r1 %>%  slice (1:500) %>%
+  ggplot() + 
+  aes( x = ensembl_gene_id,  y = mean)  +
+  geom_col() +
+  theme_pubclean()
+
+
+most_abundant_esc_expr_r1 %>%  slice (1:500) %>%
+  ggplot() + 
+  aes( x = ensembl_gene_id,  y = mean)  +
+  geom_col() +
+  theme_pubclean()
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
