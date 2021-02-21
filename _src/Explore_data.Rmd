@@ -129,7 +129,7 @@ esc_raw_expr_r1 %>%
 
 ### Comparing counts of across samples: Scatterplot
 
-```{r sample_correlation, fig.height=4, fig.width=6}
+```{r fig.height=4, fig.width=6}
 
 esc_raw_expr_r1_tibble %>% 
   ggplot() + # calling the plotting function
@@ -148,7 +148,7 @@ esc_raw_expr_r1_tibble %>%slice(1:5) %>%
 
 ### Gene expression count distribution: Histogram
 
-```{r histogram_example, fig.width=6, fig.height=4}
+```{r fig.width=6, fig.height=4}
 
 esc_raw_expr_r1_tibble  %>% 
   ggplot() + # call ggplot to make the plot!
@@ -162,7 +162,7 @@ esc_raw_expr_r1_tibble  %>%
 
 ### Gene expression count distribution: Density plot
 
-```{r density_example}
+```{r}
 
 esc_raw_expr_r1_tibble  %>% 
   ggplot() + # call ggplot to make the plot!
@@ -193,7 +193,7 @@ esc_raw_expr_r1_tibble_t %>%
 ```
 
 
-```{r gene_correlation, fig.height=4, fig.width=6}
+```{r fig.height=4, fig.width=6}
 
 esc_raw_expr_r1_tibble_t %>% slice(1:10) %>% 
   ggplot() + # calling the plotting function
@@ -232,7 +232,7 @@ esc_raw_expr_r1_tibble_t %>% slice(1:10) %>%
 
 ### Comparing counts across samples: Scatterplot
 
-```{r sample_correlation, fig.height=4, fig.width=6}
+```{r fig.height=4, fig.width=6}
 
 esc_expr_r1_tibble %>% 
   ggplot() + # calling the plotting function
@@ -245,7 +245,7 @@ esc_expr_r1_tibble %>%
 
 ### Gene expression count distribution: Histogram
 
-```{r histogram_example, fig.width=6, fig.height=4}
+```{r fig.width=6, fig.height=4}
 
 esc_raw_expr_r1_tibble  %>% 
   ggplot() + # call ggplot to make the plot!
@@ -259,7 +259,7 @@ esc_raw_expr_r1_tibble  %>%
 
 ### Gene expression count distribution: Density plot
 
-```{r density_example}
+```{r}
 
 esc_raw_expr_r1_tibble  %>% 
   ggplot() + # call ggplot to make the plot!
@@ -288,7 +288,7 @@ esc_raw_expr_r1_tibble_t %>%
 ```
 
 
-```{r gene_correlation, fig.height=4, fig.width=6}
+```{r fig.height=4, fig.width=6}
 
 esc_expr_r1_tibble_t %>% 
   ggplot() + # calling the plotting function
