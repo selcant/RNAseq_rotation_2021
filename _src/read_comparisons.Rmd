@@ -8,9 +8,13 @@ output: html_document
 #Start by setting the working directory and loading the requires packages
 
 ```{r}
+install.packages("ggpubr")
+
 library(here)
 library(ggpubr)
 library(tidyverse)
+
+renv::snapshot
 ```
 
 #Next I will load the paired end and read 1 data
@@ -57,15 +61,15 @@ esc_expr_pe %>%
   as_tibble(rownames = "ensembl_gene_id", colnames = "sample_id") -> esc_expr_pe_tibble
 
 esc_expr_r1 %>%
-  as_tibble(rownames = "ensembl_gene_id") -> esc_expr_r1_tibble
+  as_tibble(rownames = "ensembl_gene_id", colnames = "sample_id") -> esc_expr_r1_tibble
 
 esc_expr_pe %>%
   t() %>%
-  as_tibble( rownames = 'sample_id') -> esc_expr_pe_tibble_t
+  as_tibble( rownames = 'sample_id', colnames = "ensembl_gene_id") -> esc_expr_pe_tibble_t
 
  esc_expr_r1 %>%
   t() %>%
-  as_tibble( rownames = 'sample_id') -> esc_expr_r1_tibble_t
+  as_tibble( rownames = 'sample_id', colnames = "ensembl_gene_id") -> esc_expr_r1_tibble_t
 ```
 
 
@@ -128,38 +132,74 @@ most_abundant_esc_expr_r1 %>%  slice (1:100) %>%
   ggplot() + 
   aes( x = ensembl_gene_id,  y = mean)  +
   geom_col(colour = "black", fill = "yellow") +
+  scale_y_log10() +
   theme_pubclean()
 ```
 
-#I wll use a scatter plot to plot the most and least abundant gene from each data set and compare between the two data sets.
+#I will tidy the data by using pivot longer and crete box plots to compare the expression of the five most and east abundant genes within each data set.
 
 ```{r}
-esc_expr_pe_tibble_t %>% 
+
+esc_expr_pe_tibble %>%
+  pivot_longer(! ensembl_gene_id, names_to = "sample_id", values_to = "expression") -> esc_expr_pe_tibble_longer
+
+esc_expr_r1_tibble %>%
+  pivot_longer(! ensembl_gene_id, names_to = "sample_id", values_to = "expression") -> esc_expr_r1_tibble_longer
+  
+#Tidy data then plot y as the expression level and x as gene
+#figure out how o change x axis scale to 
+
+esc_expr_pe_tibble_longer %>% 
   ggplot() + 
-  aes( x =  sample_id,  y = 'ENSMUSG00000007892')  +
-  geom_point(size = 2) +
+  aes( x = 'ENSMUSG00000007892', y = expression, )  +
+  geom_boxplot() +
+  geom_jitter() +
   theme_pubclean()
 
 
-most_abundant_esc_expr_pe %>%  slice (1:100) %>%
+esc_expr_pe_tibble_longer %>% 
   ggplot() + 
-  aes( x = ensembl_gene_id,  y = mean)  +
-  geom_col(colour = "black", fill = "light green") +
+  aes( x = 'ENSMUSG00000005474', y = expression ) +
+  geom_boxplot() +
+  geom_jitter() +
   theme_pubclean()
+```
 
 
-least_abundant_esc_expr_r1 %>%  slice (1:100) %>%
-  ggplot() + 
-  aes( x = ensembl_gene_id,  y = mean)  +
-  geom_col(colour = "black", fill = "red") +
-  theme_pubclean()
+#loading gene biotypes for comparison
+```{r}
+gene_bio_types <-  load("~/git/RNAseq_rotation_2021/_data/all.genes.wbio.RData")
+gene_bio_types
 
+bio_types <- all.genes.wbio
+bio_types
 
-most_abundant_esc_expr_r1 %>%  slice (1:100) %>%
-  ggplot() + 
-  aes( x = ensembl_gene_id,  y = mean)  +
-  geom_col(colour = "black", fill = "yellow") +
-  theme_pubclean()
+bio_types %>%
+  as_tibble() -> bio_types_t
+
+bio_types_t %>% 
+  count(gene_biotype) -> bio_type_counts
+
+bio_type_counts %>% rename(count = n, biotype = gene_biotype)
+
+bio_type_counts %>%
+  ggplot() +
+  aes(x = biotype, y = count) +
+  geom_bar()
+  
+bio_type_counts %>%
+  ggplot() +
+  aes( x = gene_biotype, y = n) + 
+  geom_segment( x = gene_biotype)
+
+library(forcats)
+
+bio_type_counts %>%
+  mutate(name = fct_reorder(gene_biotype, desc(count))) %>%
+  ggplot( aes(x = gene_biotype, y = count)) +
+  geom_bar(stat="identity", fill="grey", alpha=0.7)
+  coord_flip()
+
 ```
 
 ```{r setup, include=FALSE}
