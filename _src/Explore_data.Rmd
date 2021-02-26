@@ -59,7 +59,7 @@ Let's now load in the data, it should be  located at /path-to-git-repo/RNAseq_ro
 
 ##loading paired end data
 ```{r}
-mESC_paired_end<-  load("~/git/RNAseq_rotation_2021/_data/DO185_mESC_emase_m4_noProbs_correctedIDs_02012021.RData")
+mESC_paired_end <-  load( here("_data/DO185_mESC_paired_emase_m4_noProbs_correctedIDs_02012021.RData"))
 mESC_paired_end
 ```
 
@@ -77,7 +77,7 @@ rm(expr, covar, raw.expr, exprNotes, mixupNotes)
 
 ##loading r1 data
 ```{r}
-mESC_r1<-load("~/git/RNAseq_rotation_2021/_data/DO185_mESC_emase_m4_noProbs_correctedIDs_02012021.RData")
+mESC_r1 <-load( here("_data/DO185_mESC_emase_m4_noProbs_correctedIDs_02012021.RData"))
 mESC_r1
 ```
 
@@ -115,48 +115,20 @@ esc_expr_pe %>%
 
 
 
-##Converting the data set to tibbles then making a data table
-
-```{r}
-esc_raw_expr_r1 %>% 
-  as_tibble( rownames = "ensembl_gene_id") %>% # convert to tibble with the rownames as a new column labeled ensembl_gene_id
-  select(1:6) %>%  # select first 5 columns
-  slice( 1:10) %>%  # slice first 5 rows
-  create_dt() # formatting
-```
 
 
-
-### Comparing counts of across samples: Scatterplot
-
-```{r fig.height=4, fig.width=6}
-
-esc_raw_expr_r1_tibble %>% 
-  ggplot() + # calling the plotting function
-  aes( x = `ENSMUSG00000000001	`, 
-       y = `PB357.07_repA`) + # now we can set the aesthetics, what goes on which axes, what color... you can use variable/column names inside here.
-  geom_point( size = 2 ) + # now we call the type of plot we want to see. in this case we want points. and set related parameters.
-  theme_pubclean() # theme: visual properties of the plot.
-
-```
-
-```{r}
-esc_raw_expr_r1_tibble %>%slice(1:5) %>% 
-  ggplot() + geom_bar(mapping = (aes(x =`PB357.07_repA`, fill =ensembl_gene_id)))
-```
 
 
 ### Gene expression count distribution: Histogram
 
 ```{r fig.width=6, fig.height=4}
 
-esc_raw_expr_r1_tibble  %>% 
+esc_expr_r1_tibble_t %>% 
   ggplot() + # call ggplot to make the plot!
-  aes( x = `PB357.02_repA`) + # aesthetics determine which variable is being plotted and how it is being used. you can use column names here. 
-  geom_histogram( bins = 1000, col = "blue", alpha = 0.5) + # which plot to show
-  geom_histogram( aes( x = `PB357.07_repA`), col = "red", bins = 1000, alpha = 0.4)+
-  theme_pubclean() +
-  scale_x_log10()
+  aes( x = 'ENSMUSG00000000903' ) + # aesthetics determine which variable is being plotted and how it is being used. you can use column names here. 
+  geom_histogram( bins = 1000, col = "blue", alpha = 0.5, stat = "count") + # which plot to show
+  theme_pubclean() 
+  
 
 ```
 
@@ -164,13 +136,12 @@ esc_raw_expr_r1_tibble  %>%
 
 ```{r}
 
-esc_raw_expr_r1_tibble  %>% 
+esc_expr_r1_tibble_t  %>% 
   ggplot() + # call ggplot to make the plot!
-  aes( x = `PB357.02_repA`) + # aesthetics determine which variable is being plotted and how it is being used. you can use column names here. 
+  aes( x = 'ENSMUSG00000000295') + # aesthetics determine which variable is being plotted and how it is being used. you can use column names here. 
   geom_density(  col = "blue", alpha = 0.5, adjust = 0.5) + # which plot to show
-  geom_density( aes( x = `PB357.07_repA`), col = "red",  alpha = 0.1, adjust =0.5)+
-  theme_pubclean() +
-  scale_x_log10()
+  geom_density( aes( x = 'ENSMUSG00000000295'), col = "red",  alpha = 0.1, adjust =0.5)+
+  theme_pubclean() 
 
 ```
 
@@ -204,14 +175,6 @@ esc_raw_expr_r1_tibble_t %>% slice(1:10) %>%
 
 ```
 
-```{r}
-esc_raw_expr_r1_tibble_t %>% slice(1:2) %>% 
-  ggplot() + # calling the plotting function
-  aes( x = `ENSMUSG00000000056`, 
-       y = `ENSMUSG00000000028`, shape = sample_id) + # now we can set the aesthetics, what goes on which axes, what color... you can use variable/column names inside here.
-  geom_point( size = 2 ) + # now we call the type of plot we want to see. in this case we want points. and set related parameters.
-  theme_pubclean() # theme: visual properties of the plot.
-```
 
 
 ```{r}
@@ -220,86 +183,9 @@ esc_raw_expr_r1_tibble_t %>% slice(1:2) %>%
  
 ```
 
-```{r}
-esc_raw_expr_r1_tibble_t %>% slice(1:10) %>% 
-  ggplot() + # calling the plotting function
-  aes( x = `ENSMUSG00000000056`, 
-       y = `ENSMUSG00000000028`, color = sample_id) + # now we can set the aesthetics, what goes on which axes, what color... you can use variable/column names inside here.
-  geom_point() + # now we call the type of plot we want to see. in this case we want points. and set related parameters.
-  theme_pubclean() # theme: visual properties of the plot.
-```
 
 
-### Comparing counts across samples: Scatterplot
 
-```{r fig.height=4, fig.width=6}
-
-esc_expr_r1_tibble %>% 
-  ggplot() + # calling the plotting function
-  aes( y = PB357.07_repA, 
-       x = PB357.09_repA) + # now we can set the aesthetics, what goes on which axes, what color... you can use variable/column names inside here.
-  geom_point( size = 2 ) + # now we call the type of plot we want to see. in this case we want points. and set related parameters.
-  theme_pubclean() # theme: visual properties of the plot.
-
-```
-
-### Gene expression count distribution: Histogram
-
-```{r fig.width=6, fig.height=4}
-
-esc_raw_expr_r1_tibble  %>% 
-  ggplot() + # call ggplot to make the plot!
-  aes( x = `PB357.02_repA`) + # aesthetics determine which variable is being plotted and how it is being used. you can use column names here. 
-  geom_histogram( bins = 1000, col = "blue", alpha = 0.5) + # which plot to show
-  geom_histogram( aes( x = `PB357.07_repA`), col = "red", bins = 1000, alpha = 0.4)+
-  theme_pubclean() +
-  scale_x_log10()
-
-```
-
-### Gene expression count distribution: Density plot
-
-```{r}
-
-esc_raw_expr_r1_tibble  %>% 
-  ggplot() + # call ggplot to make the plot!
-  aes( x = `PB357.02_repA`) + # aesthetics determine which variable is being plotted and how it is being used. you can use column names here. 
-  geom_density(  col = "blue", alpha = 0.5, adjust = 0.5) + # which plot to show
-  geom_density( aes( x = `PB357.07_repA`), col = "red",  alpha = 0.1, adjust =0.5)+
-  theme_pubclean() +
-  scale_x_log10()
-
-```
-
-### Comparing counts of genes: Scatterplot
-
-We can transpose the data table and then convert to a tibble to get genes on columns and samples in rows. 
-
-```{r}
-esc_raw_expr_r1 %>% 
-  t() %>% 
-  as_tibble( rownames = "sample_id") -> esc_raw_expr_r1_tibble_t
-
-esc_raw_expr_r1_tibble_t %>% 
-  slice(1:6) %>% 
-  select(1:10) %>% 
- create_dt()
-
-```
-
-
-```{r fig.height=4, fig.width=6}
-
-esc_expr_r1_tibble_t %>% 
-  ggplot() + # calling the plotting function
-  aes( x = `ENSMUSG00000000056`, 
-       y = `ENSMUSG00000000028`, 
-       color = sample_id) + # now we can set the aesthetics, what goes on which axes, what color... you can use variable/column names inside here.
-  geom_point( size = 2 , # now we call the type of plot we want to see. in this case we want points. and set related parameters.
-              show.legend = FALSE) + 
-  theme_pubclean() # theme: visual properties of the plot.
-
-```
 
 # Comparing data sets
 
@@ -309,18 +195,7 @@ Let's start comparing the two data sets.
 
 We can transpose the data table and then convert to a tibble to get genes on columns and samples in rows. 
 
-```{r}
-esc_expr_pe_tibble %>%
- as.matrix(rownames = 'emsembl_gene_id')-> esc_expr_pe_matrix 
- 
-esc_expr_pe_matrix [1:5, 1:6] %>%
-  summarise_if(is.numeric, mean) %>%
-  t() -> esc_expr_pe_matrix_t_mean
-```
 
-esc_expr_pe_tibble [1:1000,] %>%
-  t()
-  as_tibble( rownames = "sample_id", colnames = gene_names) -> esc_expr_pe_tibble_t
 
 ```{r mean_gene_expression_histogram_pe, fig.width=10, fig.height=8 }
 esc_expr_pe_tibble_t %>% select(1:1000) %>% 
@@ -328,22 +203,11 @@ esc_expr_pe_tibble_t %>% select(1:1000) %>%
   t() %>% 
   as_tibble(rownames = 'ensembl_gene_id') %>% 
   rename( "mean" = "V1") -> esc_expr_pe_mean
+
 ##Does this not show the expression of all genes for a single sample? do we not want to see the expression of all samples for a single gene?##
 
 
-##playing with code
-esc_expr_r1_tibble [1:1000,]%>% 
-  summarise_if( is.numeric, mean)%>% 
-  t() %>% 
-  as_tibble(rownames = 'ensembl_gene_id') %>%
-  rename( "mean" = "V1") -> esc_expr_r1_mean
 
-esc_expr_r1_tibble [1:1000,]%>% 
-  rowwise() %>%
-  summarise_if( is.numeric, mean) -> mean
-
-  mutate(mean_all = rowMeans)
-  ##
   
 esc_expr_pe_mean %>% 
   ggplot()+
@@ -374,9 +238,7 @@ esc_expr_r1_mean %>%
 ##histogram for distribution
   
 ##density plot for distribution
-ggplot(pe_r1_means, aes(mean, fill = dataset,))+
-   scale_fill_manual(values=c("light green","red"))+
-   geom_density(alpha = 0.2)
+
 ```
 
 
