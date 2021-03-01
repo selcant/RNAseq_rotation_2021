@@ -382,17 +382,15 @@ bio_types %>%
 bio_type_dt <- create_dt(bio_types_t[1:5000,])
 
 bio_types_t %>% 
-  count(gene_biotype) -> bio_type_counts
-
-
+  count(gene_biotype) %>% create_dt()-> bio_type_counts_dt
 
 bio_type_counts %>% rename(count = n, bio_type = gene_biotype)
 
-  
+
 bio_type_counts %>%
   ggplot() +
-  aes( x = gene_biotype, y = n) + 
-  geom_col( x = gene_biotype)
+  aes( x = bio_type, y = count) + 
+  geom_col()
 
 library(forcats)
 
