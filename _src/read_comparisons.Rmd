@@ -4,8 +4,9 @@ author: "sherrea"
 date: "2/19/2021"
 output: html_document
 ---
+This markdown will be used to compare expression data between paired end and single end reads
 
-#Start by setting the working directory and loading the requires packages
+#Start by setting the working directory and loading the required packages
 
 ```{r}
 
@@ -18,8 +19,8 @@ library(tidyverse)
 renv::snapshot
 ```
 
-#Next I will load the paired end and read 1 data
 
+##Load the paired end and single end data
 ```{r}
 #loading pe data
 
@@ -69,9 +70,8 @@ rm(expr, covar, raw.expr, exprNotes, mixupNotes, matches)
 
 ```
 
-#Right now the genes are the rows and the sample are the columns for the expression tables. I will first convert the expression data to tibbles, then transposes the data. At ecah step a new variable will be created.
-
-#At this point I will have three variuables for pe and r1 data (dataframe, converted to tibbles, transposed dataframe as a tibble).
+##Right now the genes are in rows and the samples are in columns. I will convert the expression data to tibbles, then transposes the data. At each step a new variable will be created.
+After this point I will have three variables for each data set (data frame, converted to tibbles, transposed data frame as a tibble).
 
 ```{r}
 #convert to tibbles
@@ -99,58 +99,97 @@ esc_expr_pe %>%
 ```
 
 
-#I will now start comparing the pe and r1 data. First, I wil look at the the expression of the 1000 most abundant transcripts and 1000 least abundant transcripts within each set to investigate the similarities or differences between them. I will be using the mean abundance of the transcripts.
+I will now start comparing the different reads. First, I will look at the the expression of the most abundant and least abundant transcripts within each set to investigate the similarities or differences between them. I will be using the mean abundance of the transcripts.
 
-#I will  use bar plots to plot the most and least abundant transcripts for each data set then look at if there are any similarities between the two data sets.
-
+I will calculate two different mean values. One using the first 1000 transcripts from each data set and on using the entire data set.
 ##Slice chooses rows and select chooses columns
-
 ```{r}
-#calculate the men
+#Calculate the mean using the first 1000 rows of the data set
 esc_expr_pe_tibble_t %>% select(1:1000) %>% 
-  summarise_if( is.numeric, mean) %>% 
+  summarise_if( is.numeric, mean, na.rm = TRUE) %>% 
   t() %>% 
   as_tibble(rownames = 'ensembl_gene_id') %>% 
   rename( "mean" = "V1") -> esc_expr_pe_mean
 
 esc_expr_r1_tibble_t  %>% select(1:1000) %>% 
-  summarise_if( is.numeric, mean) %>% 
+  summarise_if( is.numeric, mean, na.rm = TRUE) %>% 
   t() %>% 
   as_tibble(rownames = 'ensembl_gene_id') %>%
   rename( "mean" = "V1") -> esc_expr_r1_mean
 
 esc_expr_r2_tibble_t  %>% select(1:1000) %>% 
-  summarise_if( is.numeric, mean) %>% 
+  summarise_if( is.numeric, mean, na.rm = TRUE) %>% 
   t() %>% 
   as_tibble(rownames = 'ensembl_gene_id') %>%
   rename( "mean" = "V1") -> esc_expr_r2_mean
 
-#arrange means in ascending and descending order
-esc_expr_pe_mean %>% slice (1:1000) %>%
+#Arrange in ascending and descending order
+esc_expr_pe_mean %>% 
   arrange(mean) -> least_abundant_esc_expr_pe
 
-esc_expr_pe_mean %>% slice (1:1000) %>% 
+esc_expr_pe_mean %>%  
   arrange(-mean) -> most_abundant_esc_expr_pe
 
-esc_expr_r1_mean %>% slice (1:1000) %>%
+esc_expr_r1_mean %>%
   arrange(mean) -> least_abundant_esc_expr_r1
 
-esc_expr_r1_mean %>% slice (1:1000) %>% 
+esc_expr_r1_mean %>%
   arrange(-mean) -> most_abundant_esc_expr_r1
 
-esc_expr_r2_mean %>% slice (1:1000) %>%
+esc_expr_r2_mean %>%
   arrange(mean) -> least_abundant_esc_expr_r2
 
-esc_expr_r2_mean %>% slice (1:1000) %>% 
+esc_expr_r2_mean %>% 
   arrange(-mean) -> most_abundant_esc_expr_r2
+
+#Calculate the mean using the entire data set
+esc_expr_pe_tibble_t %>% 
+  summarise_if( is.numeric, mean, na.rm = TRUE) %>% 
+  t() %>% 
+  as_tibble(rownames = 'ensembl_gene_id') %>% 
+  rename( "mean" = "V1") -> esc_expr_pe_mean_t
+
+esc_expr_r1_tibble_t  %>% 
+  summarise_if( is.numeric, mean, na.rm = TRUE) %>% 
+  t() %>% 
+  as_tibble(rownames = 'ensembl_gene_id') %>%
+  rename( "mean" = "V1") -> esc_expr_r1_mean_t
+
+esc_expr_r2_tibble_t  %>% 
+  summarise_if( is.numeric, mean, na.rm = TRUE) %>% 
+  t() %>% 
+  as_tibble(rownames = 'ensembl_gene_id') %>%
+  rename( "mean" = "V1") -> esc_expr_r2_mean_t
+
+#Arrange in ascending and descending order
+esc_expr_pe_mean_t %>% 
+  arrange(mean) -> least_abundant_esc_expr_pe_t
+
+esc_expr_pe_mean_t %>%  
+  arrange(-mean) -> most_abundant_esc_expr_pe_t
+
+esc_expr_r1_mean_t %>%
+  arrange(mean) -> least_abundant_esc_expr_r1_t
+
+esc_expr_r1_mean_t %>%
+  arrange(-mean) -> most_abundant_esc_expr_r1_t
+
+esc_expr_r2_mean_t %>%
+  arrange(mean) -> least_abundant_esc_expr_r2_t
+
+esc_expr_r2_mean_t %>% 
+  arrange(-mean) -> most_abundant_esc_expr_r2_t
+
+most_abundant_esc_expr_pe_t
+most_abundant_esc_expr_r1_t
 
 ```
 
-##I will use bar plots to plot the averages of the 100 most and least abunddant genes in each read
+##Use bar plots to visualise the 100 most and least abundant transcripts for each data set. Mean values calculated using the entire data set will be used.
 ```{r}
 
 #plot most and lest abundant transcripts
-least_abundant_esc_expr_pe %>% slice (1:100) %>%
+least_abundant_esc_expr_pe_t %>% slice (1:100) %>%
   ggplot() + 
   ggtitle("Average values of the least abundant \npaired end read transcripts") + 
   aes( x = ensembl_gene_id,  y = mean)  +
@@ -158,7 +197,7 @@ least_abundant_esc_expr_pe %>% slice (1:100) %>%
   geom_col(colour = "black", fill = "light blue") +
  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
 
-most_abundant_esc_expr_pe %>%  slice (1:100) %>%
+most_abundant_esc_expr_pe_t %>%  slice (1:100) %>%
   ggplot() + 
    ggtitle("Average values of the most abundant \npaired end read transcripts") +
   aes( x = ensembl_gene_id,  y = mean)  +
@@ -166,9 +205,7 @@ most_abundant_esc_expr_pe %>%  slice (1:100) %>%
   geom_col(colour = "black", fill = "light green") +
  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
 
-
-
-least_abundant_esc_expr_r1 %>%  slice (1:100) %>%
+least_abundant_esc_expr_r1_t %>%  slice (1:100) %>%
   ggplot() + 
    ggtitle("Average values of the least abundant \nsigle end read 1 transcripts") +
   aes( x = ensembl_gene_id,  y = mean)  +
@@ -176,9 +213,7 @@ least_abundant_esc_expr_r1 %>%  slice (1:100) %>%
   geom_col(colour = "black", fill = "cyan") +
    theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
 
-
-
-most_abundant_esc_expr_r1 %>%  slice (1:100) %>%
+most_abundant_esc_expr_r1_t %>%  slice (1:100) %>%
   ggplot() + 
    ggtitle("Average values of the most abundant \nsigle end read 1 transcripts") +
   aes( x = ensembl_gene_id,  y = mean)  +
@@ -186,9 +221,7 @@ most_abundant_esc_expr_r1 %>%  slice (1:100) %>%
   geom_col(colour = "black", fill = "green") +
   theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
 
-
-
-least_abundant_esc_expr_r2 %>%  slice (1:100) %>%
+least_abundant_esc_expr_r2_t %>%  slice (1:100) %>%
   ggplot() + 
    ggtitle("Average values of the least abundant \nsigle end read 2 transcripts") +
   aes( x = ensembl_gene_id,  y = mean)  +
@@ -196,9 +229,7 @@ least_abundant_esc_expr_r2 %>%  slice (1:100) %>%
   geom_col(colour = "black", fill ="royal blue 1") +
   theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
 
-
-
-most_abundant_esc_expr_r2 %>%  slice (1:100) %>%
+most_abundant_esc_expr_r2_t %>%  slice (1:100) %>%
   ggplot() + 
    ggtitle("Average values of the most abundant \nsigle end read 2 transcripts") +
   aes( x = ensembl_gene_id,  y = mean)  +
@@ -207,12 +238,11 @@ most_abundant_esc_expr_r2 %>%  slice (1:100) %>%
  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
 
 
-#Remove x axis labels from plot
-#use intersect to find common abundant genes
+
+
 ```
 
-##I will use a histogram to plot the averge transcript distribution for each read
-
+##Use a histogram to plot the averge transcript distribution for each read, using both sets of averages calculated.
 ```{r}
 #plot distribution of transcript averages
 esc_expr_pe_mean %>% 
@@ -236,11 +266,31 @@ esc_expr_r2_mean %>%
   aes(x = mean) + 
   geom_histogram(bins = 50, colour = "black", fill = "cadet blue 1")
 
+esc_expr_pe_mean_t %>% 
+  ggplot() + 
+   ggtitle("Distribution of transcript averages \nfor paired end reads") +
+  aes(x = mean) + 
+  geom_histogram(bins = 100, colour = "black", fill = "gray 88") 
+  
+
+esc_expr_r1_mean_t %>% 
+  ggplot() + 
+    ggtitle("Distribution of transcript averages \nfor single end read 1") +
+   labs(x = "transcript expression average") + 
+  aes(x = mean) + 
+  geom_histogram(bins = 100, colour = "black", fill = "coral")
+
+esc_expr_r2_mean_t %>% 
+  ggplot() + 
+  ggtitle("Distribution of transcript averages \nfor single end read 2") +
+   labs(x = "transcript expression average") + 
+  aes(x = mean) + 
+  geom_histogram(bins = 100, colour = "black", fill = "cadet blue 1")
 #the x axis scale may need to be changed to allow for a more readable plot
 #the x axis label should be changed. Figure out how
 ```
 
-#I will determine if there are any common genes within the most and least abundant transcripts in each read and create data tables to display these
+##Determine if there are any common genes within the most and least abundant transcripts in each read and create data tables to display these. Both setes of averages calculated will be used.
 ```{r}
 #function to create data tables
 create_dt <- function(x){
@@ -251,6 +301,7 @@ create_dt <- function(x){
                                buttons = c('copy', 'csv', 'excel'),
                                pageLength = 10, scrollX=T))}
 
+#Using just the first 1000 genes
 #between all reads
 most_abundant_transcripts <- intersect(most_abundant_esc_expr_pe[,1], most_abundant_esc_expr_r1[,1], most_abundant_esc_expr_r2[,1])
 most_abundant_transcripts %>% create_dt()
@@ -282,15 +333,49 @@ least_abundant_transcripts_r1_pe %>% create_dt()
 #between r2 and pe
 least_abundant_transcripts_r2_pe <- intersect(least_abundant_esc_expr_pe[,1],  least_abundant_esc_expr_r2[,1])
 least_abundant_transcripts_r2_pe %>% create_dt()
+
+##using the entire data set
+#between all reads
+most_abundant_transcripts_t <- intersect(most_abundant_esc_expr_pe_t[,1], most_abundant_esc_expr_r1_t[,1], most_abundant_esc_expr_r2_t[,1])
+most_abundant_transcripts_t %>% create_dt()
+
+#between r1 and r2
+most_abundant_transcripts_r1_r2_t <- intersect(most_abundant_esc_expr_r1_t[,1], most_abundant_esc_expr_r2_t[,1])
+most_abundant_transcripts_r1_r2_t %>% create_dt()
+
+#between r1 and pe
+most_abundant_transcripts_r1_pe_t <- intersect(most_abundant_esc_expr_pe_t[,1], most_abundant_esc_expr_r1_t[,1])
+most_abundant_transcripts_r1_pe_t %>% create_dt()
+
+#between r2 and pe
+most_abundant_transcripts_r2_pe_t <- intersect(most_abundant_esc_expr_pe_t[,1],  most_abundant_esc_expr_r2_t[,1])
+most_abundant_transcripts_r2_pe_t %>% create_dt()
+
+#between all reads
+least_abundant_transcripts_t <- intersect(least_abundant_esc_expr_pe_t[,1], least_abundant_esc_expr_r1_t[,1], least_abundant_esc_expr_r2_t[,1])
+least_abundant_transcripts_t %>% create_dt()
+
+#between r1 and r2
+least_abundant_transcripts_r1_r2_t <- intersect(least_abundant_esc_expr_r1_t[,1], least_abundant_esc_expr_r2_t[,1])
+least_abundant_transcripts_r1_r2_t %>% create_dt()
+
+#between r1 and pe
+least_abundant_transcripts_r1_pe_t <- intersect(least_abundant_esc_expr_pe_t[,1], least_abundant_esc_expr_r1_t[,1])
+least_abundant_transcripts_r1_pe_t %>% create_dt()
+
+#between r2 and pe
+least_abundant_transcripts_r2_pe_t <- intersect(least_abundant_esc_expr_pe_t[,1],  least_abundant_esc_expr_r2_t[,1])
+least_abundant_transcripts_r2_pe_t %>% create_dt()
+
+
 ```
 
-#I will create data tables that show the commow genes amongst the most and least variable  and aundant transcripts
 
-
+##Calculate the standard deviation of the transcripts, using the entire data sets, and create data tables that show the commow genes amongst the most and least variable transcripts
 ```{r}
-#calculate the sd
-esc_expr_pe_tibble_t %>% select(1:1000) %>% 
-  summarise_if( is.numeric, sd) %>% 
+#Calculate the sd
+esc_expr_pe_tibble_t %>% 
+  summarise_if( is.numeric, sd, na.rm = TRUE) %>% 
   t() %>% 
   as_tibble(rownames = 'ensembl_gene_id') %>%
   rename( "sd" = "V1") -> esc_expr_pe_st_dev
@@ -301,11 +386,12 @@ esc_expr_pe_st_dev %>%
 esc_expr_pe_st_dev %>%
   arrange(-sd) -> least_var_esc_expr_pe
 
-esc_expr_r1_tibble_t %>% select(1:1000) %>% 
-  summarise_if( is.numeric, sd) %>% 
+esc_expr_r1_tibble_t %>% 
+  summarise_if(is.numeric, sd, na.rm = TRUE) %>%
   t() %>% 
   as_tibble(rownames = 'ensembl_gene_id') %>%
   rename( "sd" = "V1") -> esc_expr_r1_st_dev
+
 
 esc_expr_r1_st_dev %>%
   arrange(sd) -> most_var_esc_expr_r1
@@ -313,8 +399,8 @@ esc_expr_r1_st_dev %>%
 esc_expr_r1_st_dev %>%
   arrange(-sd) -> least_var_esc_expr_r1
 
-esc_expr_r2_tibble_t %>% select(1:1000) %>% 
-  summarise_if( is.numeric, sd) %>% 
+esc_expr_r2_tibble_t %>% 
+  summarise_if( is.numeric, sd, na.rm = TRUE) %>% 
   t() %>% 
   as_tibble(rownames = 'ensembl_gene_id') %>%
   rename( "sd" = "V1") -> esc_expr_r2_st_dev
@@ -326,48 +412,47 @@ esc_expr_r2_st_dev %>%
   arrange(-sd) -> least_var_esc_expr_r2
 
 #common transcripts among the most and least variable within each read
-most_var_transcripts <- intersect(most_var_esc_expr_pe, most_var_esc_expr_r1, most_var_esc_expr_r2)
+most_var_transcripts <- intersect(most_var_esc_expr_pe[,1], most_var_esc_expr_r1[,1], most_var_esc_expr_r2[,1])
 most_var_transcripts %>% create_dt()
 
-least_var_transcripts <- intersect(least_var_esc_expr_pe, least_var_esc_expr_r1, least_var_esc_expr_r2)
+least_var_transcripts <- intersect(least_var_esc_expr_pe[,1], least_var_esc_expr_r1[,1], least_var_esc_expr_r2[,1])
 least_var_transcripts %>% create_dt()
 ```
 
-
-#I will tidy the data by using pivot longer and create box plots to compare the expression of the five most and east abundant genes within each data set. or five random genes
-
+I will analyse the expression of pluripotent associated genes 
+##Tidy the data by using pivot longer and create box plots to compare the expression of three genes associated with ESC pluripotency
 ```{r}
-
-#This isn't working. Figure out why!
 esc_expr_pe_tibble %>%
   pivot_longer(! ensembl_gene_id, names_to = "sample_id", values_to = "expression") -> esc_expr_pe_tibble_longer
+esc_expr_pe_tibble_longer$read <- 'pe'
 
 esc_expr_r1_tibble %>%
   pivot_longer(! ensembl_gene_id, names_to = "sample_id", values_to = "expression") -> esc_expr_r1_tibble_longer
+esc_expr_r1_tibble_longer$read <- 'r1'
+
+esc_expr_r2_tibble %>%
+  pivot_longer(! ensembl_gene_id, names_to = "sample_id", values_to = "expression") -> esc_expr_r2_tibble_longer
+  esc_expr_r2_tibble_longer$read <- 'r2'
   
-#Tidy data then plot y as the expression level and x as gene
-#figure out how o change x axis scale to 
+rbind(esc_expr_pe_tibble_longer, esc_expr_r1_tibble_longer, esc_expr_r2_tibble_longer) -> esc_read_type
 
-esc_expr_pe_tibble_longer %>% 
+
+
+#ENSMUSG00000074637 sox2 protein coding
+#ENSMUSG00000012396 nanog protein coding
+#ENSMUSG00000022346 myc protein coding
+
+
+esc_read_type %>% filter(ensembl_gene_id == "ENSMUSG00000074637") %>%
   ggplot() + 
-  aes( x = 'ENSMUSG00000007892', y = expression, )  +
+  aes( x =(ensembl_gene_id), y = expression, fill = read)  +
   geom_boxplot() +
-  geom_jitter() +
   theme_pubclean()
 
-
-esc_expr_pe_tibble_longer %>% 
-  ggplot() + 
-  aes( x = 'ENSMUSG00000005474', y = expression ) +
-  geom_boxplot() +
-  geom_jitter() +
-  theme_pubclean()
 ```
 
 
-
-
-# I will analyse the biotypes of the transcripts by creating a plot as well as a dta table that list the biotype of each transcript
+#Analyse the biotypes of the transcripts by creating a plot as well as a data table that list the biotype of each transcript
 ```{r}
 
 gene_bio_types <-  load( here("_data/all.genes.wbio.RData"))
@@ -379,25 +464,18 @@ bio_types
 bio_types %>%
   as_tibble() -> bio_types_t
 
-bio_type_dt <- create_dt(bio_types_t[1:5000,])
+bio_types_t %>% create_dt() -> bio_types_dt
 
 bio_types_t %>% 
-  count(gene_biotype) %>% create_dt()-> bio_type_counts_dt
+  count(gene_biotype) -> biotype_counts
 
-bio_type_counts %>% rename(count = n, bio_type = gene_biotype)
-
-
-bio_type_counts %>%
+biotype_counts %>% 
+  filter(n>25) %>%
+  arrange(n) %>%
+  mutate(gene_biotype=factor(gene_biotype, levels=gene_biotype)) %>%
   ggplot() +
-  aes( x = bio_type, y = count) + 
-  geom_col()
-
-library(forcats)
-
-bio_type_counts %>%
-  mutate(name = fct_reorder(gene_biotype, desc(count))) %>%
-  ggplot( aes(x = gene_biotype, y = count)) +
-  geom_bar(stat="identity", fill="grey", alpha=0.7)
+  aes( x = gene_biotype, y = n) + 
+  labs(x = "biotype", y = "number of genes") +
+  geom_col(colour = "black", fill = "lightcyan") +
   coord_flip()
-
 ```
