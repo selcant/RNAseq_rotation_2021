@@ -1,0 +1,98 @@
+---
+title: "eQTL_comparisons"
+author: "sherrea"
+date: "3/4/2021"
+output: html_document
+---
+
+First install and load required packages. Then load the appropriate files and then start with the comparisons.
+```{r}
+install.packages("qtl2")
+
+library(here)
+library(qtl2)
+library(tidyverse)
+library(ggplot2)
+```
+
+```{r}
+renv::snapshot
+```
+
+##Load the paired end and r1 peak data
+```{r}
+here()
+
+paired_end_peak_data <- load( here("_data/DO_mESC_paired_eQTL_peaks.RData"))
+pe_peaks <- peaks
+
+pe_peaks %>% as_tibble() -> pe_peaks_t
+pe_peaks_t %>% rename( chromosome = peak_chr)
+
+r1_peak_data <- load( here("_data/DO_mESC_eQTL_peaks.RData"))
+r1_peaks <- peaks
+
+r1_peaks %>% as_tibble() -> r1_peaks_t
+r1_peaks_t %>% rename( chromosome = peak_chr)
+
+```
+
+
+##Use bar plots to analyse how many peaks there are per chromosome for each read
+```{r}
+
+pe_peaks_t %>% 
+  count(peak_chr) %>% arrange(n) -> pe_chr_peak_counts
+
+pe_chr_peak_counts %>% 
+  arrange(n) %>%
+  mutate(peak_chr = factor(peak_chr, levels=peak_chr)) %>%
+  ggplot() + 
+  ggtitle("peaks per chromosome") + 
+  aes(x = peak_chr, y = n) +
+  geom_col(colour = "black", fill = "gold") +
+  labs(x= "number of peaks", y= "chromosome")
+
+
+r1_peaks_t$peak_chr <- as.factor(r1_peaks_t$peak_chr)
+
+r1_peaks_t %>% 
+  count(peak_chr) %>% arrange(n) -> r1_chr_peak_counts
+
+r1_chr_peak_counts %>% 
+  arrange(n) %>%
+  mutate(peak_chr = factor(peak_chr, levels=peak_chr)) %>%
+  ggplot() + 
+  ggtitle("peaks per chromosome") + 
+  aes(x = peak_chr, y = n) +
+  geom_col(colour = "black", fill = "dodgerblue3") +
+  labs(x= "number of peaks", y= "chromosome")
+```
+
+
+I will analyse which/ how many transcripts have a significant lod score
+##Arrange the peak data by lod scors and evalate which transcripts have a lod score of 7 or higher and create data tables
+```{r}
+create_dt <- function(x){
+  DT::datatable(x,
+                extensions = 'Buttons',
+                rownames = FALSE, filter="top",
+                options = list(dom = 'Blfrtip',
+                               buttons = c('copy', 'csv', 'excel'),
+                               pageLength = 10, scrollX=T))}
+pe_peaks %>% 
+  filter(lod>7.00000) -> significant_pe_peaks
+
+significant_pe_peaks %>% arrange(lod) %>% create_dt()
+
+
+r1_peaks %>% 
+  filter(lod>7.50000) -> significant_r1_peaks 
+
+significant_r1_peaks  %>% arrange(lod) %>% create_dt()
+
+##for comparison
+r1_peaks %>% create_dt()
+pe_peaks %>% create_dt()
+```
+

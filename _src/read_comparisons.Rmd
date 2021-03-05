@@ -252,35 +252,35 @@ create_dt <- function(x){
                                pageLength = 10, scrollX=T))}
 
 #between all reads
-most_abundant_transcripts <- intersect(most_abundant_esc_expr_pe, most_abundant_esc_expr_r1, most_abundant_esc_expr_r2)
+most_abundant_transcripts <- intersect(most_abundant_esc_expr_pe[,1], most_abundant_esc_expr_r1[,1], most_abundant_esc_expr_r2[,1])
 most_abundant_transcripts %>% create_dt()
 
 #between r1 and r2
-most_abundant_transcripts_r1_r2 <- intersect(most_abundant_esc_expr_r1, most_abundant_esc_expr_r2)
+most_abundant_transcripts_r1_r2 <- intersect(most_abundant_esc_expr_r1[,1], most_abundant_esc_expr_r2[,1])
 most_abundant_transcripts_r1_r2 %>% create_dt()
 
 #between r1 and pe
-most_abundant_transcripts_r1_pe <- intersect(most_abundant_esc_expr_pe, most_abundant_esc_expr_r1)
+most_abundant_transcripts_r1_pe <- intersect(most_abundant_esc_expr_pe[,1], most_abundant_esc_expr_r1[,1])
 most_abundant_transcripts_r1_pe %>% create_dt()
 
 #between r2 and pe
-most_abundant_transcripts_r2_pe <- intersect(most_abundant_esc_expr_pe,  most_abundant_esc_expr_r2)
+most_abundant_transcripts_r2_pe <- intersect(most_abundant_esc_expr_pe[,1],  most_abundant_esc_expr_r2[,1])
 most_abundant_transcripts_r2_pe %>% create_dt()
 
 #between all reads
-least_abundant_transcripts <- intersect(least_abundant_esc_expr_pe, least_abundant_esc_expr_r1, least_abundant_esc_expr_r2)
+least_abundant_transcripts <- intersect(least_abundant_esc_expr_pe[,1], least_abundant_esc_expr_r1[,1], least_abundant_esc_expr_r2[,1])
 least_abundant_transcripts %>% create_dt()
 
 #between r1 and r2
-least_abundant_transcripts_r1_r2 <- intersect(least_abundant_esc_expr_r1, least_abundant_esc_expr_r2)
+least_abundant_transcripts_r1_r2 <- intersect(least_abundant_esc_expr_r1[,1], least_abundant_esc_expr_r2[,1])
 least_abundant_transcripts_r1_r2 %>% create_dt()
 
 #between r1 and pe
-least_abundant_transcripts_r1_pe <- intersect(least_abundant_esc_expr_pe, least_abundant_esc_expr_r1)
+least_abundant_transcripts_r1_pe <- intersect(least_abundant_esc_expr_pe[,1], least_abundant_esc_expr_r1[,1])
 least_abundant_transcripts_r1_pe %>% create_dt()
 
 #between r2 and pe
-least_abundant_transcripts_r2_pe <- intersect(least_abundant_esc_expr_pe,  least_abundant_esc_expr_r2)
+least_abundant_transcripts_r2_pe <- intersect(least_abundant_esc_expr_pe[,1],  least_abundant_esc_expr_r2[,1])
 least_abundant_transcripts_r2_pe %>% create_dt()
 ```
 
